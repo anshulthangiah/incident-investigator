@@ -1,0 +1,57 @@
+{
+  "id": "S17",
+  "title": "A bulk import stored recipient numbers without a dial code for one group of users",
+  "question": "A group of users say the verification code never arrives for them, while others are fine. What is going on?",
+  "generate": {
+    "faults": [
+      {
+        "type": "format_strip",
+        "start": "2026-11-15T18:00",
+        "mode": "delivery_failed",
+        "users_fraction": 0.2
+      }
+    ],
+    "user_data": {
+      "missing_dial_code": {
+        "start": "2026-11-15T18:00",
+        "share_of_new_users": 0.25
+      }
+    },
+    "api": {
+      "latency_ms": 80,
+      "forward": "keep",
+      "echo_forwarded_number": false
+    },
+    "repos": {
+      "code_service": "clean",
+      "message_gateway": "clean"
+    },
+    "outputs": {
+      "api_failed_log": false,
+      "api_failed_log_benign_records": 0,
+      "export_damage_share": 0.0,
+      "primary_store": "webhook_store"
+    }
+  },
+  "expected": {
+    "outcome": "cause_found",
+    "cause_category": "bulk_import_missing_dial_code",
+    "layer": "user_data",
+    "culprit_repo": null,
+    "must_mention": [
+      "dial code",
+      "import",
+      "user data"
+    ],
+    "must_not_claim": [
+      "release change",
+      "provider outage",
+      "credit"
+    ],
+    "shortest_path": [
+      "fetch_logs:delivery_reports",
+      "check_user_data"
+    ],
+    "notes": "Failures are confined to one group of users whose numbers were stored in local format (no dial code) by a bulk import. The failure wording in the mock is a placeholder and the report must say the real wording is unconfirmed. Unlike S1a and S1b the repositories are clean and the cause sits in the user data; the report says releases were ruled out only if it checked them."
+  }
+}

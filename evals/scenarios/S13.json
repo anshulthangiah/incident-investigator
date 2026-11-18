@@ -1,0 +1,50 @@
+{
+  "id": "S13",
+  "title": "Same drop, no failed-call log configured",
+  "question": "Verification codes are not coming at all since early morning. Is something broken?",
+  "generate": {
+    "faults": [
+      {
+        "type": "credit_exhausted",
+        "start": "2026-11-16T03:00"
+      }
+    ],
+    "api": {
+      "latency_ms": 80,
+      "forward": "keep",
+      "echo_forwarded_number": false
+    },
+    "repos": {
+      "code_service": "clean",
+      "message_gateway": "clean"
+    },
+    "outputs": {
+      "api_failed_log": false,
+      "api_failed_log_benign_records": 0,
+      "export_damage_share": 0.0,
+      "primary_store": "webhook_store"
+    }
+  },
+  "expected": {
+    "outcome": "inconclusive",
+    "cause_category": "unchecked_pre_submission_failures",
+    "layer": "unknown",
+    "culprit_repo": null,
+    "must_mention": [
+      "E101",
+      "E102",
+      "E103",
+      "failed-call log"
+    ],
+    "must_not_claim": [
+      "no issue",
+      "all clear",
+      "credit is the cause"
+    ],
+    "shortest_path": [
+      "fetch_logs:delivery_reports",
+      "call_api"
+    ],
+    "notes": "The delivery reports stop at 03:00. Without the failed-call log the report must not say there is no issue. It lists credit (E101), sender not allowed (E102) and template missing (E103) as unchecked and asks for the export. The codes E101, E102 and E103 are invented. Naming credit as a possible cause to check is fine; stating it as the cause is not."
+  }
+}

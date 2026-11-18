@@ -1,0 +1,49 @@
+{
+  "id": "S2",
+  "title": "Provider outage on one route",
+  "question": "Verification codes are not arriving for many users since the early morning. What is wrong?",
+  "generate": {
+    "faults": [
+      {
+        "type": "route_failure",
+        "route": "5",
+        "start": "2026-11-16T04:00",
+        "fail_share": 0.8,
+        "reason": "Network failure: operator timeout"
+      }
+    ],
+    "api": {
+      "latency_ms": 80,
+      "forward": "keep",
+      "echo_forwarded_number": false
+    },
+    "repos": {
+      "code_service": "clean",
+      "message_gateway": "clean"
+    },
+    "outputs": {
+      "api_failed_log": false,
+      "api_failed_log_benign_records": 0,
+      "export_damage_share": 0.0,
+      "primary_store": "webhook_store"
+    }
+  },
+  "expected": {
+    "outcome": "cause_found",
+    "cause_category": "provider_route_failure",
+    "layer": "provider",
+    "culprit_repo": null,
+    "must_mention": [
+      "route 5",
+      "failed"
+    ],
+    "must_not_claim": [
+      "release",
+      "credit"
+    ],
+    "shortest_path": [
+      "fetch_logs:delivery_reports"
+    ],
+    "notes": "Stop early: the delivery reports are enough. The report says the API and releases were not checked and why. Failure wording in the mock is invented."
+  }
+}

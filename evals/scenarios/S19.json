@@ -1,0 +1,51 @@
+{
+  "id": "S19",
+  "title": "Verification codes are delivered, but many take one to four minutes",
+  "question": "Users say the verification code arrives very late, often after it has already expired. Are the messages failing?",
+  "generate": {
+    "faults": [
+      {
+        "type": "late_delivery",
+        "start": "2026-11-16T04:00",
+        "share": 0.7,
+        "min_s": 60,
+        "max_s": 226
+      }
+    ],
+    "api": {
+      "latency_ms": 80,
+      "forward": "keep",
+      "echo_forwarded_number": false
+    },
+    "repos": {
+      "code_service": "clean",
+      "message_gateway": "clean"
+    },
+    "outputs": {
+      "api_failed_log": false,
+      "api_failed_log_benign_records": 0,
+      "export_damage_share": 0.0,
+      "primary_store": "webhook_store"
+    }
+  },
+  "expected": {
+    "outcome": "cause_found",
+    "cause_category": "delivery_delay",
+    "layer": "provider",
+    "culprit_repo": null,
+    "must_mention": [
+      "delay",
+      "delivered"
+    ],
+    "must_not_claim": [
+      "delivery failures",
+      "credit",
+      "release change",
+      "api timeout"
+    ],
+    "shortest_path": [
+      "fetch_logs:delivery_reports"
+    ],
+    "notes": "Every message is delivered and the failure rate is normal, but the gap between the request time and the delivery time is far above the usual few seconds for most messages after the start. The delay values are invented and only chosen to be clearly above normal. The report must say the logs show the gap between request and delivery at the provider only; a delay before the request reaches the provider is not visible from this data."
+  }
+}

@@ -1,0 +1,21 @@
+.DS_Store
+node_modules/
+*.aiff
+
+# Python and generated data
+__pycache__/
+*.pyc
+.venv/
+mock/generated/
+
+# Local settings, never published
+.env
+
+# Investigator working files (local only)
+sessions/
+reports/
+knowledge/
+inputs/
+.ii_secret
+data/exports/
+evals/results/

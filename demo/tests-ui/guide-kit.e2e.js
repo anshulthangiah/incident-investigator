@@ -1,0 +1,173 @@
+// Generic end-to-end test for the Product Builder guide kit (Take a Tour + Builder mode).
+// It reads window.GUIDE from the page, so the same file tests any project that uses the kit.
+//   node tests-ui/guide-kit.e2e.js [folder-with-index.html] [start-file]
+// Needs playwright + chromium. Pass criteria are the signature rules in the take-a-tour and builder-mode skills.
+const { chromium } = require("playwright");
+const http = require("http"), fs = require("fs"), path = require("path");
+const root = path.resolve(process.argv[2] || path.join(__dirname, ".."));
+const START = process.argv[3] || "index.html";
+const mime = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".mp3": "audio/mpeg", ".png": "image/png", ".json": "application/json" };
+const srv = http.createServer((q, r) => { const u = q.url.split("?")[0]; const f = path.join(root, u === "/" ? START : u); fs.readFile(f, (e, d) => { if (e) { r.statusCode = 404; r.end(); } else { r.setHeader("content-type", mime[path.extname(f)] || "text/plain"); r.end(d); } }); });
+const results = []; const ok = (n, c, extra) => results.push((c ? "PASS " : "FAIL ") + n + (extra ? "  [" + extra + "]" : ""));
+const shot = (pg, n) => pg.screenshot({ path: "/tmp/guide-kit-" + n + ".png" });
+
+(async () => {
+  const port = await new Promise((r) => srv.listen(0, () => r(srv.address().port)));
+  const base = "http://localhost:" + port + "/";
+  const b = await chromium.launch(); const pg = await (await b.newContext({ viewport: { width: 1280, height: 900 } })).newPage();
+  const errs = []; pg.on("pageerror", (e) => errs.push(e.message)); pg.on("console", (m) => m.type() === "error" && errs.push(m.text()));
+  await pg.addInitScript(() => { window.SIM_SPEED = 0.05; });
+  const vis = (s) => pg.locator(s).isVisible();
+  const text = (s) => pg.locator(s).innerText();
+  const box = (sel) => pg.evaluate((sel) => { const el = [...document.querySelectorAll(sel)].find((e) => e.offsetWidth || e.offsetHeight || e.getClientRects().length); if (!el) return null; const r = el.getBoundingClientRect(); return { x: r.x, y: r.y, width: r.width, height: r.height }; }, sel);
+  const overlap = (a, c) => !(a.x + a.width <= c.x || a.x >= c.x + c.width || a.y + a.height <= c.y || a.y >= c.y + c.height);
+  const mascotLoaded = (scope) => pg.evaluate((scope) => { const i = document.querySelector(scope + " img.mascot"); return !!i && i.naturalWidth > 0; }, scope);
+  const visibleMascots = () => pg.evaluate(() => [...document.querySelectorAll("img[src*='mascot']")].filter((i) => i.offsetWidth || i.offsetHeight).length);
+
+  // ================================================================ Take a Tour
+  await pg.goto(base + (START === "index.html" ? "" : START));
+  await pg.waitForSelector("#tour-card:not([hidden])", { timeout: 5000 });
+  const C = await pg.evaluate(() => JSON.parse(JSON.stringify(window.GUIDE)));
+  const N = C.STEPS.length, name = C.MASCOT.name;
+  ok("first visit opens the welcome card by itself", await vis("#tour-card"));
+  ok("welcome names the guide and shows his picture", new RegExp(name).test(await text("#tour-card")) && (await mascotLoaded("#tour-card")));
+  ok("welcome offers Start the tour (no stop count) and Skip", (await text("#t-next")).trim() === "Start the tour" && (await vis("#t-skip")));
+  await shot(pg, "welcome");
+  await pg.locator("#t-next").click();
+
+  for (let i = 0; i < N; i++) {
+    const s = C.STEPS[i], tag = "stop " + (i + 1) + ": ";
+    await pg.waitForTimeout(450);
+    const t = await text("#tour-card");
+    ok(tag + "title and 'Stop " + (i + 1) + " of " + N + "'", t.includes(s.title) && new RegExp("Stop " + (i + 1) + " of " + N).test(t));
+    ok(tag + "one source label", (await pg.locator("#tour-card .srcchip").count()) === 1);
+    const order = (await pg.locator("#tour-card dt").allInnerTexts()).map((x) => x.toLowerCase()).join("|");
+    ok(tag + "four rows in the signature order, one column", order === "current scenario|what i built|why it should work|how i would measure it", order);
+    ok(tag + "guide picture and name in the card header", (await mascotLoaded("#tour-card .thead")) && new RegExp(name).test(await text("#tour-card .thead")));
+    const tgt = await box(s.target), rb = await pg.locator("#tour-ring").boundingBox(), cb = await pg.locator("#tour-card").boundingBox();
+    ok(tag + "the live feature exists on screen", !!tgt, s.target);
+    if (tgt && rb) {
+      ok(tag + "spotlight ring sits on the feature", rb.x <= tgt.x + 1 && rb.y <= tgt.y + 1 && rb.x + rb.width >= tgt.x + tgt.width - 1 && rb.y + rb.height >= tgt.y + tgt.height - 1);
+      ok(tag + "the feature is on screen, not scrolled away", tgt.y >= 0 && tgt.y + Math.min(tgt.height, 40) <= 900);
+      ok(tag + "the card never covers the feature", !overlap(cb, rb));
+    }
+    ok(tag + "card is docked at the right, full height, same place as every stop", Math.abs(cb.x + cb.width - 1268) <= 2 && cb.width >= 370 && cb.width <= 390 && cb.y <= 14, JSON.stringify([cb.x, cb.y, cb.width, cb.height].map(Math.round)));
+    ok(tag + "Back and Next are on screen", await pg.evaluate(() => { const r = document.getElementById("t-next").getBoundingClientRect(); return r.bottom <= innerHeight && r.top >= 0; }));
+    const y0 = await pg.evaluate(() => scrollY);
+    await pg.mouse.move(300, 400); await pg.mouse.wheel(0, 700); await pg.keyboard.press("PageDown"); await pg.waitForTimeout(150);
+    ok(tag + "the page cannot be scrolled by hand during the tour", (await pg.evaluate(() => scrollY)) === y0);
+    if (i === 0 || i === N - 1) await shot(pg, "stop" + (i + 1));
+    await pg.locator("#t-next").click();
+  }
+
+  // wrap-up
+  await pg.waitForTimeout(250);
+  const A = C.CLOSE.ctas;
+  ok("wrap-up shows the guide, the points and what is not proven", (await mascotLoaded("#tour-card")) && (await pg.locator("#tour-card .tclose li").count()) === C.CLOSE.points.length && /What this does not prove/.test(await text("#tour-card")));
+  ok("wrap-up shows the plan as rows, not a paragraph", (await pg.locator("#tour-card .planlist > div").count()) === C.CLOSE.plan.length);
+  ok("wrap-up has exactly two big actions, each a verb plus a one-line result", (await pg.locator("#tour-card .cta").count()) === 2 && (await text("#t-try")).includes(A.try.title) && (await text("#t-try")).includes(A.try.desc) && (await text("#t-builder")).includes(A.builder.title) && (await text("#t-builder")).includes(A.builder.desc));
+  ok("wrap-up fits without inner scrolling", await pg.evaluate(() => { const c = document.getElementById("tour-card"); return c.scrollHeight <= c.clientHeight + 1; }));
+  await shot(pg, "wrapup");
+  await pg.locator("#t-try").click(); await pg.waitForTimeout(300);
+  ok("'Replay a run' (the first wrap-up action) closes the tour cleanly", !(await vis("#tour-card")) && !(await vis("#tour-ring")) && !(await vis("#tour-dim")));
+  ok("the page can scroll again and is not squeezed", await pg.evaluate(() => getComputedStyle(document.documentElement).overflow !== "hidden" && getComputedStyle(document.body).paddingRight === "0px"));
+  ok("no guide picture is visible once the tour is closed and Builder mode is off", (await visibleMascots()) === 0);
+
+  // remembered, replay, keys
+  await pg.reload(); await pg.waitForTimeout(900);
+  ok("the tour does not reopen once it has been seen", !(await vis("#tour-card")));
+  await pg.locator("#tour-start").click();
+  ok("'" + C.META.tourButton + "' reopens it", await vis("#tour-card"));
+  await pg.keyboard.press("Escape");
+  ok("Escape closes it", !(await vis("#tour-card")) && !(await vis("#tour-dim")));
+  await pg.locator("#tour-start").click(); await pg.keyboard.press("ArrowRight");
+  ok("ArrowRight advances", /Stop 1 of/.test(await text("#tour-card")));
+  await pg.keyboard.press("ArrowLeft");
+  ok("ArrowLeft goes back", new RegExp(C.WELCOME.title).test(await text("#tour-card")));
+  await pg.keyboard.press("Tab"); await pg.keyboard.press("Tab"); await pg.keyboard.press("Tab");
+  ok("Tab keeps focus inside the card", await pg.evaluate(() => document.getElementById("tour-card").contains(document.activeElement)));
+  await pg.locator("#t-next").click(); await pg.locator("#t-skip").click(); await pg.waitForTimeout(700);
+  ok("skipping right after a stop leaves no ring, no dimming, no lock", !(await vis("#tour-ring")) && !(await vis("#tour-dim")) && (await pg.evaluate(() => getComputedStyle(document.documentElement).overflow !== "hidden")));
+
+
+  // ================================================================ Phone sizes: the spotlight must sit on the feature, nothing wider than the screen
+  for (const [label, w, h] of [["phone 375x667", 375, 667], ["phone 390x844", 390, 844], ["phone 412x915", 412, 915]]) {
+    const mctx = await b.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+    const mp = await mctx.newPage(); const merrs = []; mp.on("pageerror", (e) => merrs.push(e.message));
+    await mp.addInitScript(() => { window.SIM_SPEED = 0.05; });
+    await mp.goto(base + (START === "index.html" ? "" : START));
+    await mp.waitForSelector("#tour-card:not([hidden])", { timeout: 5000 });
+    await mp.locator("#t-next").click();
+    for (let i = 0; i < N; i++) {
+      await mp.waitForTimeout(700);
+      const m = await mp.evaluate((i) => {
+        const s = window.GUIDE.STEPS[i], t = window.Guide.firstVisible(s.target), ring = document.getElementById("tour-ring"), card = document.getElementById("tour-card");
+        if (!t) return { missing: true };
+        const rr = ring.getBoundingClientRect(), tr = t.getBoundingClientRect(), cr = card.getBoundingClientRect();
+        const inter = Math.max(0, Math.min(rr.right, tr.right) - Math.max(rr.left, tr.left)) * Math.max(0, Math.min(rr.bottom, tr.bottom) - Math.max(rr.top, tr.top));
+        return { missing: false, ringShown: !ring.hidden, overlap: Math.round(100 * inter / (tr.width * tr.height)), above: Math.round(Math.min(tr.bottom, cr.top) - Math.max(tr.top, 0)), need: Math.round(Math.min(60, tr.height)), tooWide: (() => { const vw = document.documentElement.clientWidth, bad = []; const inScroller = (el) => { for (let a = el.parentElement; a && a !== document.body; a = a.parentElement) { const o = getComputedStyle(a).overflowX; if (o === "auto" || o === "scroll" || o === "hidden") return true; } return false; }; document.querySelectorAll("body *").forEach((el) => { if (el.closest("#tour-root,#builder-root,#builder-legend")) return; const r = el.getBoundingClientRect(); if (!r.width || r.right <= vw + 1) return; if (getComputedStyle(el).position === "fixed" || inScroller(el)) return; bad.push(el.tagName.toLowerCase() + (el.id ? "#" + el.id : "") + "@" + Math.round(r.right)); }); return bad.slice(0, 3); })(), vw: document.documentElement.clientWidth, nextInView: (() => { const n = document.getElementById("t-next").getBoundingClientRect(); return n.bottom <= innerHeight && n.right <= innerWidth && n.left >= 0; })() };
+      }, i);
+      ok(label + ", stop " + (i + 1) + ": ring sits on the feature, it is visible above the card, nothing sticks out past the right edge of the screen (a table may scroll inside its own box), Next is on screen",
+        !m.missing && m.ringShown && m.overlap >= 80 && m.above >= m.need && m.tooWide.length === 0 && m.nextInView, JSON.stringify(m));
+      if (i === 0) await mp.screenshot({ path: "/tmp/guide-kit-phone-" + w + ".png" });
+      if (i < N - 1) await mp.locator("#t-next").click();
+    }
+    ok(label + ": no page errors", merrs.length === 0, merrs.join("|"));
+    await mctx.close();
+  }
+
+  // ================================================================ Builder mode
+  const sw = "#builder-toggle";
+  ok("Builder mode starts Off: the switch says so and nothing is drawn", /off/i.test(await text(sw)) && (await pg.locator(sw).getAttribute("aria-checked")) === "false" && (await pg.locator(".bmark").count()) === 0 && !(await vis("#builder-legend")));
+  await pg.locator(sw).click(); await pg.waitForTimeout(350);
+  ok("the switch says On and turns orange", /on/i.test(await text(sw)) && !/off/i.test(await text(sw)) && (await pg.locator(sw).getAttribute("aria-checked")) === "true" && (await pg.evaluate(() => getComputedStyle(document.querySelector("#builder-toggle .bsw-track")).backgroundColor)) === "rgb(255, 106, 61)");
+  const ms = await pg.locator(".bmark").evaluateAll((els) => els.map((e) => { const r = e.getBoundingClientRect(); return { n: e.textContent.trim(), id: e.dataset.step, x: r.x, y: r.y, w: r.width, h: r.height }; }));
+  ok("every number is shown the moment it is switched on, with nothing loaded", ms.length === N && ms.map((m) => m.n).sort().join("") === C.STEPS.map((s) => s.n).sort().join(""), ms.map((m) => m.n).join(","));
+  ok("every number is fully on screen", ms.every((m) => m.x >= 0 && m.y >= 0 && m.x + m.w <= 1280 && m.y + m.h <= 900));
+  let clash = false; for (let i = 0; i < ms.length; i++) for (let j = i + 1; j < ms.length; j++) if (Math.abs(ms[i].x - ms[j].x) < 28 && Math.abs(ms[i].y - ms[j].y) < 28) clash = true;
+  ok("no two numbers overlap", !clash);
+  ok("Builder mode calls them stops, never gaps: the legend, its hint and the number labels use the tour's word", !/\bgaps?\b/i.test(await text("#builder-legend")) && (await pg.locator("#builder-legend .lgbtn").first().getAttribute("aria-label")).startsWith("Stop 1"));
+  ok("the legend lists every stop, with the guide picture", (await pg.locator("#builder-legend .lgbtn").count()) === N && (await mascotLoaded("#builder-legend")));
+  const hint = await text("#builder-legend .lghint");
+  ok("the hint starts 'Tap a number for the detail.' and says where numbers are", /^Tap a number for the detail\./.test(hint) && hint.length > 40, hint);
+  await shot(pg, "builder-on");
+  await pg.locator('.bmark[data-step="' + C.STEPS[0].id + '"]').click(); await pg.waitForTimeout(250);
+  const bc = await pg.locator("#builder-card").boundingBox();
+  ok("a number opens its card with the same four rows in the same order", (await text("#builder-card")).includes(C.STEPS[0].title) && (await pg.locator("#builder-card dt").allInnerTexts()).map((x) => x.toLowerCase()).join("|") === "current scenario|what i built|why it should work|how i would measure it");
+  ok("the card is docked in the same place as the tour card", Math.abs(bc.x + bc.width - 1268) <= 2 && bc.width >= 370 && bc.width <= 390);
+  const pin = await box(C.STEPS[0].pin);
+  ok("the card does not cover the feature it describes", !pin || !overlap(bc, pin));
+  ok("the guide picture is in the legend only: not in the card, the header or the app", (await pg.locator("#builder-card img").count()) === 0 && (await pg.locator("header img, main img[src*='mascot']").count()) === 0 && (await mascotLoaded("#builder-legend")));
+  await shot(pg, "builder-card");
+  await pg.keyboard.press("Escape");
+  ok("Escape closes the card", !(await vis("#builder-card")));
+  await pg.locator('#builder-legend .lgbtn[data-step="' + C.STEPS[N - 1].id + '"]').click(); await pg.waitForTimeout(200);
+  ok("the legend opens any stop, even when its feature is not on this screen", await vis("#builder-card") && (await text("#builder-card")).includes(C.STEPS[N - 1].title));
+  await pg.locator("#builder-show").click(); await pg.waitForTimeout(400);
+  ok("'Show me' closes the card and brings the feature into view", !(await vis("#builder-card")) && !!(await box(C.STEPS[N - 1].pin)));
+  await pg.locator(sw).click(); await pg.waitForTimeout(250);
+  ok("switching Builder mode off clears every number and the legend", (await pg.locator(".bmark").count()) === 0 && !(await vis("#builder-legend")) && (await visibleMascots()) === 0);
+
+  // ================================================================ Replay behaviour specific to this demo
+  await pg.goto(base + "?notour"); await pg.waitForTimeout(300);
+  ok("the notice bar is on the home screen", /^Replay of recorded runs on simulated systems\./.test(await text(".notice")));
+  ok("the home screen offers five recorded runs, each with a Replay button", (await pg.locator("#picker .run-card").count()) === 5 && (await pg.locator("#picker button[data-run]").count()) === 5);
+  ok("the privacy panel has three facts", (await pg.locator("#privacy li").count()) === 3);
+  ok("the footer states the real counts and the real-model numbers", /scenarios/.test(await text("#footer-line")) && /A real model \(.+\) passed \d+ of \d+ checks/.test(await text("#footer-line")) && !/not yet published/.test(await text("#footer-line")));
+  await pg.locator('#picker button[data-run="S2"]').click();
+  ok("the notice bar is on the replay screen too", await vis(".notice"));
+  ok("replay starts with the question only", (await pg.locator("#q-block").count()) === 1 && (await pg.locator(".call").count()) === 0);
+  await pg.locator("#btn-next").click();
+  ok("Next shows the first check as a card", (await pg.locator("#call-E1").count()) === 1);
+  for (let k = 0; k < 6; k++) { if (await pg.locator("#btn-next").isEnabled()) await pg.locator("#btn-next").click(); }
+  ok("the report shows sections 1 to 5 and section 3 and 5 are highlighted blocks", (await pg.locator("#report .sec").count()) === 5 && (await pg.locator("#report .sec.emph").count()) === 2);
+  await pg.locator("#sec-1 .cite").first().click();
+  ok("clicking a citation highlights the check it points to", await pg.evaluate(() => document.querySelector("#call-E1").classList.contains("hl")));
+  await pg.locator("#btn-pick").click(); await pg.locator('#picker button[data-run="S8"]').click();
+  for (let k = 0; k < 6; k++) { if (await pg.locator("#btn-next").isEnabled()) await pg.locator("#btn-next").click(); }
+  ok("the run that ends inconclusive on purpose is labelled", /This run ends inconclusive on purpose/.test(await text("#inconclusive-label")));
+
+  console.log(results.join("\n")); console.log("page errors:", JSON.stringify(errs));
+  console.log("SUMMARY pass=" + results.filter((x) => x.startsWith("PASS")).length + " fail=" + results.filter((x) => x.startsWith("FAIL")).length);
+  await b.close(); srv.close(); process.exit(results.some((x) => x.startsWith("FAIL")) || errs.length ? 1 : 0);
+})().catch((e) => { console.log(results.join("\n")); console.log("CRASH", e.message); process.exit(1); });

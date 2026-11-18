@@ -1,0 +1,49 @@
+{
+  "id": "S11",
+  "title": "Webhook paused: a six-hour gap in the logs",
+  "question": "Some users say there was no verification code this morning. Did we have failures?",
+  "generate": {
+    "faults": [
+      {
+        "type": "webhook_gap",
+        "start": "2026-11-16T02:00",
+        "end": "2026-11-16T08:00"
+      }
+    ],
+    "api": {
+      "latency_ms": 80,
+      "forward": "keep",
+      "echo_forwarded_number": false
+    },
+    "repos": {
+      "code_service": "clean",
+      "message_gateway": "clean"
+    },
+    "outputs": {
+      "api_failed_log": false,
+      "api_failed_log_benign_records": 0,
+      "export_damage_share": 0.0,
+      "primary_store": "webhook_store"
+    }
+  },
+  "expected": {
+    "outcome": "inconclusive",
+    "cause_category": "coverage_gap",
+    "layer": "data_coverage",
+    "culprit_repo": null,
+    "must_mention": [
+      "gap",
+      "02:00",
+      "08:00"
+    ],
+    "must_not_claim": [
+      "no failures",
+      "no issue",
+      "all clear"
+    ],
+    "shortest_path": [
+      "fetch_logs:delivery_reports"
+    ],
+    "notes": "There are no records between 02:00 and 08:00 on 16 Nov. Silence is not good news: the report states the gap and says the webhook receiver and its pause status should be checked."
+  }
+}

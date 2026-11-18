@@ -1,0 +1,45 @@
+{
+  "id": "S7",
+  "title": "No fault",
+  "question": "A few people complained about verification codes. Is anything wrong?",
+  "generate": {
+    "faults": [],
+    "api": {
+      "latency_ms": 80,
+      "forward": "keep",
+      "echo_forwarded_number": false
+    },
+    "repos": {
+      "code_service": "clean",
+      "message_gateway": "clean"
+    },
+    "outputs": {
+      "api_failed_log": true,
+      "api_failed_log_benign_records": 2,
+      "export_damage_share": 0.0,
+      "primary_store": "webhook_store"
+    }
+  },
+  "expected": {
+    "outcome": "no_issue",
+    "cause_category": "none",
+    "layer": "none",
+    "culprit_repo": null,
+    "must_mention": [
+      "no issue",
+      "ruled out"
+    ],
+    "must_not_claim": [
+      "cause",
+      "outage",
+      "credit",
+      "release"
+    ],
+    "shortest_path": [
+      "fetch_logs:delivery_reports",
+      "fetch_logs:api_failed_log",
+      "call_api"
+    ],
+    "notes": "Everything is at baseline. The failed-call log is present with two benign records (mock code E190) so credit, sender and template problems can be ruled out with the coverage period shown."
+  }
+}

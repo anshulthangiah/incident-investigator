@@ -1,0 +1,53 @@
+{
+  "id": "S10",
+  "title": "Bad commit is in the second of two repositories",
+  "question": "Some users report they get no verification code even after several retries. Is there an issue?",
+  "generate": {
+    "faults": [
+      {
+        "type": "format_strip",
+        "start": "2026-11-15T18:00",
+        "mode": "delivery_failed"
+      }
+    ],
+    "api": {
+      "latency_ms": 80,
+      "forward": "strip_prefix",
+      "echo_forwarded_number": true
+    },
+    "repos": {
+      "code_service": "clean",
+      "message_gateway": "bad_commit"
+    },
+    "outputs": {
+      "api_failed_log": false,
+      "api_failed_log_benign_records": 0,
+      "export_damage_share": 0.0,
+      "primary_store": "webhook_store"
+    }
+  },
+  "expected": {
+    "outcome": "cause_found",
+    "cause_category": "release_change_recipient_format",
+    "layer": "api_release",
+    "culprit_repo": "message_gateway",
+    "must_mention": [
+      "recipient format",
+      "message_gateway"
+    ],
+    "must_not_claim": [
+      "provider outage",
+      "credit"
+    ],
+    "ruled_out": [
+      "code_service"
+    ],
+    "shortest_path": [
+      "fetch_logs:delivery_reports",
+      "call_api",
+      "delegate_repo_check",
+      "delegate_repo_check"
+    ],
+    "notes": "Both repositories have a recent benign commit; only message_gateway changes the recipient format (drops the dial code). Run with delegation on and off and compare time, tokens and accuracy. The mock API shows the forwarded number in its mock-only field here."
+  }
+}

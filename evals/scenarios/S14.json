@@ -1,0 +1,47 @@
+{
+  "id": "S14",
+  "title": "Export damaged by a spreadsheet: phone numbers in scientific notation",
+  "question": "Some users report they get no verification code even after several retries. Is there an issue?",
+  "generate": {
+    "faults": [
+      {
+        "type": "format_strip",
+        "start": "2026-11-15T18:00",
+        "mode": "delivery_failed"
+      }
+    ],
+    "api": {
+      "latency_ms": 80,
+      "forward": "keep",
+      "echo_forwarded_number": false
+    },
+    "repos": {
+      "code_service": "bad_commit",
+      "message_gateway": "clean"
+    },
+    "outputs": {
+      "api_failed_log": false,
+      "api_failed_log_benign_records": 0,
+      "export_damage_share": 0.9,
+      "primary_store": "manual_export"
+    }
+  },
+  "expected": {
+    "outcome": "inconclusive",
+    "cause_category": "data_quality",
+    "layer": "data_quality",
+    "culprit_repo": null,
+    "must_mention": [
+      "scientific notation",
+      "fresh CSV export"
+    ],
+    "must_not_claim": [
+      "dial code is missing",
+      "strips the dial code"
+    ],
+    "shortest_path": [
+      "fetch_logs:delivery_reports"
+    ],
+    "notes": "Most recipient number values in the export were re-saved by a spreadsheet and look like 4.57E+11. The report flags this, says dial-code and number-shape checks are unreliable, does not name a cause from them, and asks for a fresh CSV export."
+  }
+}

@@ -1,0 +1,1684 @@
+{
+ "title": "Real-model baseline, v1.0.0",
+ "date": "2026-11-18",
+ "provider": "anthropic",
+ "model": "claude-sonnet-5-5",
+ "what_this_is": "One real-model run of each of the 22 scenarios on the invented mock system, scored by evals/run_evals.py. A baseline, not an accuracy claim.",
+ "how_it_was_scored": "Required phrases also match plain paraphrases and the tool's own template ids (see PHRASE_ALTERNATIVES in evals/run_evals.py). That rule was written after the first round and applied to all saved reports offline, so the first-round reports were re-scored without a new model call.",
+ "runs": [
+  {
+   "label": "s2-check",
+   "run_id": "20261118_121256",
+   "scenarios_run": [
+    "S2"
+   ],
+   "estimated_spend_usd": 0.0525,
+   "model_calls": 2,
+   "not_run": []
+  },
+  {
+   "label": "round-1",
+   "run_id": "20261118_121732",
+   "scenarios_run": [
+    "S7",
+    "S21",
+    "S8",
+    "S1a",
+    "S1b",
+    "S3",
+    "S4",
+    "S5",
+    "S6",
+    "S9",
+    "S10",
+    "S11",
+    "S12"
+   ],
+   "estimated_spend_usd": 0.8141,
+   "model_calls": 32,
+   "not_run": [
+    "S13",
+    "S14",
+    "S15",
+    "S17",
+    "S18",
+    "S19",
+    "S20",
+    "S22"
+   ]
+  },
+  {
+   "label": "round-2",
+   "run_id": "20261118_123949",
+   "scenarios_run": [
+    "S13",
+    "S14",
+    "S15",
+    "S17",
+    "S18",
+    "S19",
+    "S20",
+    "S22",
+    "S3",
+    "S5",
+    "S6",
+    "S9",
+    "S12",
+    "S21",
+    "S7",
+    "S4"
+   ],
+   "estimated_spend_usd": 0.9113,
+   "model_calls": 37,
+   "not_run": [
+    "S8"
+   ]
+  }
+ ],
+ "totals": {
+  "scenarios": 22,
+  "checks_passed": 129,
+  "checks_total": 154,
+  "scenarios_passing_every_check": [
+   "S2",
+   "S3",
+   "S6",
+   "S8",
+   "S9",
+   "S12",
+   "S18",
+   "S20"
+  ],
+  "per_check": {
+   "outcome": "14/22",
+   "cause_category": "21/22",
+   "must_mention": "13/22",
+   "must_not_claim": "21/22",
+   "shortest_path": "16/22",
+   "citations": "22/22",
+   "section5": "22/22"
+  },
+  "average_extra_tool_calls_per_scenario": 3.2,
+  "estimated_total_spend_usd": 1.78
+ },
+ "notes": [
+  "Spend is an estimate from the PRICE_*_PER_MTOK settings; the provider's usage page is the record.",
+  "Scenarios run in two rounds changed score between rounds (S5, S6, S7), so one run is not stable evidence.",
+  "The per-tool-call results were not saved in these runs, only the tool names and the final reports."
+ ],
+ "scenarios": [
+  {
+   "scenario": "S2",
+   "from_run": "s2-check",
+   "tools_called": [
+    "fetch_delivery_logs",
+    "get_credit_balance",
+    "check_message_queue",
+    "recent_code_changes"
+   ],
+   "seconds": 22.5,
+   "model_calls": 2,
+   "input_tokens": 14299,
+   "output_tokens": 2390,
+   "expected_outcome": "cause_found",
+   "score": {
+    "checks": {
+     "outcome": {
+      "pass": true,
+      "got": "cause_found",
+      "expected": "cause_found"
+     },
+     "cause_category": {
+      "pass": true,
+      "expected": "provider_route_failure",
+      "words_found": [
+       "provider",
+       "route",
+       "failure"
+      ]
+     },
+     "must_mention": {
+      "pass": true,
+      "missing": []
+     },
+     "must_not_claim": {
+      "pass": true,
+      "claimed_in_verdict": []
+     },
+     "shortest_path": {
+      "pass": true,
+      "expected_tools": [
+       "fetch_delivery_logs"
+      ],
+      "not_called": [],
+      "tool_calls": 4,
+      "extra_steps": 3
+     },
+     "citations": {
+      "pass": true,
+      "cited": [
+       "E1",
+       "E2",
+       "E3",
+       "E4"
+      ],
+      "unknown": []
+     },
+     "section5": {
+      "pass": true,
+      "present": true,
+      "says_none": false
+     }
+    },
+    "passed": 7,
+    "total": 7,
+    "all_passed": true
+   },
+   "report": "1) **Verdict:** Most likely a problem on provider route 5, which began around 04:00 UTC today. Confidence is medium. The route is clearly the pattern, but I can't see the reason behind it. [E1]\n\n2) **Evidence**\n- Today's failure rate is 22.5% (61 of 271 requests so far). On the seven earlier days it was 1.8–3.0%. [E1]\n- Route 5 failed on 58 of 73 requests today (79.5%). Route 4 failed on 3 of 198 (1.5%). Route 5 accounts for 95% of today's failures, and the first bad hour was 04:00 UTC. [E1]\n- Today's failures are not tied to one sender (MOCKB 23%, MOCKA 22%) or one template (18–31%). That fits a route-level fault better than a sender or template fault. [E1]\n- The failure reasons are all recipient-side or network: Recipient unreachable (65), Network failure (58), Recipient opted out (30) and Message expired (20). The glossary says Network failure and Message expired are usually temporary operator or network problems, and persistent cases go to the provider. [E1]\n- These reason counts cover the whole 9–16 Nov window, not just today. I can't tell which reasons make up today's spike. [E1]\n- Messages that did get through were fast: median delay 6 seconds and maximum 9 seconds. [E1]\n- Every SMS row since 9 Nov was handed to the provider within 30 seconds, and nothing is waiting in the queue. The newest row is from 11:58 UTC. So messages are being sent, not held back. [E3]\n- Today's request volume looks normal so far: 271 by 12:00 UTC, against 510–832 for full earlier days. This is a partial day, so I can't call it a drop. [E1]\n\n3) **Not checked / limits**\n- **Ruled out:**\n  - Credit exhaustion: the balance is 4,200 now and there is no volume drop. This is the balance now, not at 04:00. [E2][E1]\n  - Template or registration failure: no Registration category and no single template carrying the failures. [E1]\n  - Late delivery from queue delay: all rows were sent in under 30 seconds. [E3]\n  - Missing log files: none. [E1]\n  - Repeated requests replacing codes: only 0.4% of requests today, so not a driver. [E1]\n  - Code changes: recent commits touch only logging, wording and retry, and I read subjects and file names, not the code. [E4]\n  - Short numbers from an empty dial code: all recipients have 12 digits. [E1]\n- **Still open or not checkable:**\n  - Why route 5 is failing. This is a provider or operator question that no tool here can answer.\n  - Stale or rejected API credential: not tested. The API check was not run, and the request volume suggests requests reach the provider.\n  - Empty dial codes in user records: I didn't run the user-data check, and counts there are current, not historical.\n  - Stopped scheduled database jobs: no tool can see them. The queue looks current, so there is no sign of a problem.\n  - Per-number checks: unavailable because you gave no phone numbers.\n  - An older code still working after a newer one was issued: this is a code-level fault that no tool here can test.\n  - SENT only means handed to the provider, not received. The queue check also can't tell code messages from other texts. [E3]\n\n4) **Suggested next steps**\n- Ask the provider whether route 5 has an incident or operator problem since about 04:00 UTC today. Quote the failure rate of about 80%.\n- If route 5 is the problem, ask engineering whether traffic can be moved to route 4. Route 4 is healthy, with a 1.5% failure rate today. [E1]\n- Re-run the delivery-log check in an hour to see whether the failure rate is falling.\n- Tell affected users to request a new code, but only once. A new request replaces the earlier code.\n\n5) **Information needed from you**\n1. Provider status or incident notice for route 5, 16 Nov from 04:00 UTC. It would confirm or rule out a provider-side fault. Ask your messaging provider's support, or check their status page, and send a typed note.\n2. Which route engineering configured as route 5, and whether it was changed recently. It would show whether this is a configuration problem on our side. Ask engineering or DevOps for a typed note.\n3. A delivery-log export (CSV, UTC, failed rows included) for 16 Nov only. It would show the failure reasons for today alone. The current reason counts mix all eight days. Export it from the provider."
+  },
+  {
+   "scenario": "S3",
+   "from_run": "round-2",
+   "tools_called": [
+    "fetch_delivery_logs",
+    "get_credit_balance",
+    "recent_code_changes"
+   ],
+   "seconds": 16.0,
+   "model_calls": 2,
+   "input_tokens": 13728,
+   "output_tokens": 1831,
+   "expected_outcome": "cause_found",
+   "score": {
+    "checks": {
+     "outcome": {
+      "pass": true,
+      "got": "cause_found",
+      "expected": "cause_found"
+     },
+     "cause_category": {
+      "pass": true,
+      "expected": "template_rejected",
+      "words_found": [
+       "template"
+      ]
+     },
+     "must_mention": {
+      "pass": true,
+      "missing": []
+     },
+     "must_not_claim": {
+      "pass": true,
+      "claimed_in_verdict": []
+     },
+     "shortest_path": {
+      "pass": true,
+      "expected_tools": [
+       "fetch_delivery_logs"
+      ],
+      "not_called": [],
+      "tool_calls": 3,
+      "extra_steps": 2
+     },
+     "citations": {
+      "pass": true,
+      "cited": [
+       "E1",
+       "E2",
+       "E3"
+      ],
+      "unknown": []
+     },
+     "section5": {
+      "pass": true,
+      "present": true,
+      "says_none": false
+     }
+    },
+    "passed": 7,
+    "total": 7,
+    "all_passed": true
+   },
+   "report": "1) **Verdict:** Since about 06:00 UTC today, every message using template tpl-0002 has failed with \"Template not registered\". This is a template registration problem, and I'm highly confident of it. The cause of the change is not yet known.\n\n2) **Evidence**\n- Today's failure rate is 27.2%. On 11-10 to 11-15 it was 1.4–2.0% [E1].\n- All 76 of today's tpl-0002 requests failed (100%). The other templates failed at 1.4% [E1].\n- tpl-0002 accounts for 96.2% of today's failures. The first bad hour was 06:00 UTC [E1].\n- The failure reason is \"Template not registered\", category Registration. The glossary meaning is \"The message text does not match any registered template.\" The fix is ours to make: a template or sender registration problem with the provider [E1].\n- The problem is not tied to one route or sender. Routes 4 and 5 failed at 27.5% and 26.4%. Senders MOCKA and MOCKB failed at 28.3% and 23.9%. This fits a template problem that cuts across them [E1].\n- The usual background failures look normal. Recipient unreachable, opted out and expired make up the rest of the window's failures. The 1.4–2.0% rate on earlier days matches the known recipient-side pattern [E1].\n- Delivery time is normal: median 5 s and maximum 9 s [E1].\n- Credit is healthy at 4,200 [E2]. That is the balance now, not at earlier times.\n- Recent commits include \"Update code expiry wording\" in `src/codes/settings.py`. The commit dates are masked, so I can't tie it to 06:00 UTC today. I also can't tell from subjects alone whether it changed message text [E3]. It is a lead to check, not a cause.\n- Repeat requests are 2.1% today against 1.2–1.7% before. That is not a meaningful change [E1].\n\n3) **Not checked / limits**\n- **Ruled out:** credit exhaustion [E2]. Volume or delay problems: today's volume is a partial day and looks normal, and delivery times are normal [E1]. Empty recipient numbers: all numbers are 12 digits [E1]. Normal background failures as the main cause [E1].\n- **Open, a missing export:** there is no data for 11-03 to 11-08. That is a missing file, not zero traffic [E1]. Earlier history of tpl-0002 failures cannot be compared.\n- **Open, why tpl-0002 broke:** I can't see the template's registered text or what changed in it. Commit subjects don't show this.\n- **Not checked, API check:** I did not run `check_code_api`. Delivery rows exist, so requests reach the provider.\n- **Not checked, user data and queue:** I did not run these. The failures are concentrated on one template, which they would not explain.\n- **Unavailable, per-user lookup:** `check_numbers` can't run because no phone numbers were given.\n- **Cannot check, repeat requests:** the logs can't show which code a user typed.\n\n4) **Suggested next steps**\n- Engineering: compare the current tpl-0002 message text with what is registered with the provider.\n- Engineering: check whether the \"Update code expiry wording\" change, or any other edit, altered tpl-0002's text around 06:00 UTC today.\n- Fix by re-registering the template or reverting the wording.\n- Short term, consider sending login codes with tpl-0001, which is working. Only do this if engineering agrees.\n- After the fix, re-run the delivery logs for the new hours to confirm tpl-0002 recovers.\n- Tell affected users to request a new code. Failed messages were not delivered.\n\n5) **Information needed from you**\n1. Date and time of the \"Update code expiry wording\" commit, and whether it was deployed around 05:00–06:00 UTC on 2026-11-16. This confirms or rules out the lead. Ask engineering.\n2. The registered text of tpl-0002 compared with the text the service sends, and any registration change at the provider. This confirms the mismatch. Ask engineering or whoever manages the provider account.\n3. Delivery-log export (CSV, UTC, failed rows included) for 2026-11-03 to 2026-11-08. This shows whether tpl-0002 failed earlier and fills the gap. Ask whoever holds the exports."
+  },
+  {
+   "scenario": "S4",
+   "from_run": "round-2",
+   "tools_called": [
+    "fetch_delivery_logs",
+    "check_message_queue"
+   ],
+   "seconds": 17.0,
+   "model_calls": 2,
+   "input_tokens": 13784,
+   "output_tokens": 1845,
+   "expected_outcome": "cause_found",
+   "score": {
+    "checks": {
+     "outcome": {
+      "pass": false,
+      "got": "no_issue",
+      "expected": "cause_found"
+     },
+     "cause_category": {
+      "pass": true,
+      "expected": "slow_api",
+      "words_found": [
+       "slow",
+       "api"
+      ]
+     },
+     "must_mention": {
+      "pass": true,
+      "missing": []
+     },
+     "must_not_claim": {
+      "pass": true,
+      "claimed_in_verdict": []
+     },
+     "shortest_path": {
+      "pass": false,
+      "expected_tools": [
+       "fetch_delivery_logs",
+       "check_code_api"
+      ],
+      "not_called": [
+       "check_code_api"
+      ],
+      "tool_calls": 2,
+      "extra_steps": 0
+     },
+     "citations": {
+      "pass": true,
+      "cited": [
+       "E1",
+       "E2"
+      ],
+      "unknown": []
+     },
+     "section5": {
+      "pass": true,
+      "present": true,
+      "says_none": false
+     }
+    },
+    "passed": 5,
+    "total": 7,
+    "all_passed": false
+   },
+   "report": "1) **Verdict:** I found no sign of slow code delivery in the provider logs or the message queue, so the cause is not visible here. Confidence is moderate-high for 2026-11-09 to 2026-11-16 and none for earlier dates. The slowness may sit where these tools can't see, and the API check is the quickest way to test that.\n\n2) **Evidence**\n- Provider delivery time is normal. The median is 6 s, the 90th percentile is 9 s and the maximum is 9 s across 4,889 requests [E1]. The user-reported \"very long\" wait does not appear in these logs.\n- The queue is not holding messages back. Nothing is waiting now, and all 4,889 SMS and 804 push rows were sent within 30 seconds of being created [E2]. The newest row is from 11:58 UTC today, so the data is current [E2].\n- Failures look like normal background noise. The rate is 2.2% overall and 1.5–3.2% per day [E1]. The reasons are all recipient-side or network: recipient unreachable (68), opted out (20) and \"message expired\" (19, category Network, usually nothing to fix on our side) [E1].\n- No route, sender or template stands out. Failure rates are similar across them, and the tool reports no concentration [E1].\n- Volume looks plausible. The weekday range is 478–770 requests a day, and today's 263 by 12:05 follows the usual daytime build-up [E1]. 2026-11-09 was the lowest weekday at 478 [E1]. I can't tell whether that is normal for a Monday, because there is no earlier Monday to compare it with [E1].\n- Repeat requests are uncommon, at 1.2% of requests (2.3% today). Repeating a request replaces the earlier code, so a user who types the old one is told it is invalid. That could look like a failed code, but it is not a delay [E1].\n\n3) **Not checked / limits**\n- Ruled out for 2026-11-09 to 2026-11-16: slow delivery at the provider and in the queue [E1][E2], a template or registration fault [E1], recipient-side failures above the usual level [E1], and a delivery-log volume collapse [E1].\n- Missing data: no log data for 2026-11-03 to 2026-11-08. That is a missing export, not zero traffic [E1].\n- Open: the verification API could be slow before a request reaches the queue or provider. That delay would not appear in either log. I can only test this with `check_code_api`, which needs your approval.\n- Open: credit balance, user-data checks (empty dial codes) and recent code changes were not checked. Failures are not concentrated and every recipient number has 12 digits [E1], so these are unlikely causes but not excluded.\n- Cannot check: the queue table can't tell code messages from other texts, and \"SENT\" means handed to the provider, not received [E2]. I also can't see delays inside the user's phone or carrier network, the API server's own log, or the scheduled database jobs.\n- Cannot check: individual users' numbers, because you gave no phone numbers and `check_numbers` is unavailable.\n\n4) **Suggested next steps**\n- Run the API test (see section 5) to measure how long the API takes to answer and whether the provider log shows the request.\n- Ask the engineering team for the API server's response times and errors for the time of the complaints.\n- Compare the complaints with the data. Get the affected users' approximate times, countries and carriers, and whether they were on SMS or push. Delay at the operator after delivery to the provider would not show here.\n\n5) **Information needed from you**\n1. Approval to run the API test, which sends one real message to your test number - it shows whether the API itself is slow or erroring before the provider - run `python3 investigate.py --continue --approve-probe`.\n2. Dates and times (UTC) of the complaints, plus the country or carrier and whether SMS or push - it lets me match them against the logs and spot a carrier-specific delay - send as a typed note, or ask support.\n3. Delivery-log export for 2026-11-03 to 2026-11-08 - it would fill the gap if the complaints began in that period - CSV in UTC with failed rows included, from whoever holds the provider exports.\n4. API server response-time and error log for the complaint period - it would show a slow API that the provider and queue logs cannot - ask engineering or DevOps."
+  },
+  {
+   "scenario": "S5",
+   "from_run": "round-2",
+   "tools_called": [
+    "fetch_delivery_logs",
+    "check_message_queue",
+    "get_credit_balance",
+    "recent_code_changes"
+   ],
+   "seconds": 21.0,
+   "model_calls": 2,
+   "input_tokens": 14277,
+   "output_tokens": 2116,
+   "expected_outcome": "cause_found",
+   "score": {
+    "checks": {
+     "outcome": {
+      "pass": true,
+      "got": "cause_found",
+      "expected": "cause_found"
+     },
+     "cause_category": {
+      "pass": false,
+      "expected": "two_faults",
+      "words_found": []
+     },
+     "must_mention": {
+      "pass": true,
+      "missing": []
+     },
+     "must_not_claim": {
+      "pass": true,
+      "claimed_in_verdict": []
+     },
+     "shortest_path": {
+      "pass": false,
+      "expected_tools": [
+       "fetch_delivery_logs",
+       "check_code_api"
+      ],
+      "not_called": [
+       "check_code_api"
+      ],
+      "tool_calls": 4,
+      "extra_steps": 2
+     },
+     "citations": {
+      "pass": true,
+      "cited": [
+       "E1",
+       "E2",
+       "E3",
+       "E4"
+      ],
+      "unknown": []
+     },
+     "section5": {
+      "pass": true,
+      "present": true,
+      "says_none": false
+     }
+    },
+    "passed": 5,
+    "total": 7,
+    "all_passed": false
+   },
+   "report": "1) **Verdict:** Failures today come from one template, tpl-0003, which has failed on every send since about 06:00 UTC. The likely reason is \"Template not registered\", which is ours to fix. Confidence is medium-high. I found no evidence of slowness. [E1]\n\n2) **Evidence**\n- Today's failure rate is 14.5%. Earlier days ran 1.5–2.7%. [E1]\n- tpl-0003 failed 36 of 36 sends today (100%). The other templates failed 0.9% of the time. tpl-0003 accounts for 94.7% of today's failures, and the first bad hour was 06:00 UTC. [E1]\n- The window holds exactly 36 \"Template not registered\" failures, the same number as tpl-0003's failures today. This suggests they are the same rows, but the tool doesn't link reason to template by day. The glossary says this means the message text doesn't match any registered template, and that it is ours to fix with the provider. [E1]\n- The failures are not tied to one route or sender. Both routes and both senders show elevated rates, and that is what you'd expect if one template fails across all of them. [E1]\n- The remaining failure reasons look like normal background noise. These are \"Recipient unreachable\" (69), \"Recipient opted out\" (17) and \"Message expired\" (13). I can't tell from the tool whether they changed today. [E1]\n- Slowness is not visible in the logs. Delivery delay is median 5s, p90 9s and max 9s. [E1] Every queued SMS and push row was sent within 30 seconds, and nothing is waiting now. [E2] The queue table has current data. [E2]\n- Today's volume is 262 requests by about noon, and the hourly pattern looks normal. [E1] Credit is 4,200, so credit is not the cause. [E3]\n- Repeat requests are 1.1% today, in line with earlier days (0.9–1.9%). [E1]\n- Recent commits touch code-expiry wording, gateway logging and a retry on provider timeout. Their dates were masked in the output, so I can't tie any of them to 06:00 UTC. The \"expiry wording\" change in `settings.py` might alter message text, but I can't confirm that. [E4]\n\n3) **Not checked / limits**\n- **Ruled out:** credit exhaustion [E3]; a late-delivery problem in the queue or at the provider [E1][E2]; a volume drop or missing requests today [E1]; a rise in repeat requests [E1].\n- **Open, template or registration:** the cause of the tpl-0003 failures is not confirmed. The template text may have changed, or its registration with the provider may have lapsed. Commit dates are masked, so I can't link either to 06:00. [E4]\n- **Open, slowness:** users may still feel slowness that the logs don't show. The provider delay is measured only after the request reaches the provider. The queue check can't tell code rows from other text rows. [E1][E2]\n- **Not available:** `check_numbers`, because you gave no phone numbers. I haven't checked any individual user.\n- **Not run:** `check_code_api`, `check_user_data` and the other classes. The API, credential and empty-dial-code classes have no sign of a problem in today's data. They are not proven healthy.\n- **Missing data:** 03–08 Nov have no log export. That is a missing file, not zero traffic. [E1]\n- **Cannot be seen by any tool here:** scheduled database jobs, and the code that validates a code.\n\n4) **Suggested next steps**\n- Ask whoever owns the provider registration to check tpl-0003's registered text against what is being sent. Ask whether the template changed or its registration expired around 06:00 UTC.\n- Check whether the `settings.py` \"expiry wording\" commit changed the tpl-0003 message text, and when it was deployed.\n- Consider a temporary fallback for tpl-0003 flows, such as switching to a registered template, once engineering agrees.\n- Re-pull the logs after the fix. tpl-0003 failures should fall to near 0%.\n\n5) **Information needed from you**\n1. What \"slow\" means to users: which flow, which hours, and roughly how many minutes they wait. This shows whether it is real delay or the failed tpl-0003 sends. Send it as a typed note.\n2. Which product flow uses tpl-0003, and its registered text compared with the text now sent. This confirms or rules out the registration mismatch. Ask engineering or whoever manages the provider account.\n3. The deploy times for the code_service and message_gateway commits, mainly the \"expiry wording\" change. This shows whether a deploy at about 06:00 UTC caused the failures. Ask engineering or DevOps.\n4. Optional: a delivery-log export for 03–08 Nov, with failed rows included. This fills the baseline gap. Send it as a CSV in UTC."
+  },
+  {
+   "scenario": "S6",
+   "from_run": "round-2",
+   "tools_called": [
+    "fetch_delivery_logs",
+    "check_user_data",
+    "recent_code_changes",
+    "get_credit_balance"
+   ],
+   "seconds": 17.4,
+   "model_calls": 2,
+   "input_tokens": 14616,
+   "output_tokens": 2147,
+   "expected_outcome": "cause_found",
+   "score": {
+    "checks": {
+     "outcome": {
+      "pass": true,
+      "got": "cause_found",
+      "expected": "cause_found"
+     },
+     "cause_category": {
+      "pass": true,
+      "expected": "template_rejected_cohort",
+      "words_found": [
+       "template",
+       "rejected"
+      ]
+     },
+     "must_mention": {
+      "pass": true,
+      "missing": []
+     },
+     "must_not_claim": {
+      "pass": true,
+      "claimed_in_verdict": []
+     },
+     "shortest_path": {
+      "pass": true,
+      "expected_tools": [
+       "fetch_delivery_logs"
+      ],
+      "not_called": [],
+      "tool_calls": 4,
+      "extra_steps": 3
+     },
+     "citations": {
+      "pass": true,
+      "cited": [
+       "E1",
+       "E2",
+       "E3",
+       "E4"
+      ],
+      "unknown": []
+     },
+     "section5": {
+      "pass": true,
+      "present": true,
+      "says_none": false
+     }
+    },
+    "passed": 7,
+    "total": 7,
+    "all_passed": true
+   },
+   "report": "**1) Verdict:** Users whose codes go out through sender MOCKB are the ones affected, and mostly those on template tpl-0001. This started around 00:00 UTC today (2026-11-16). The likely cause is a template or sender registration problem on our side. Confidence is medium: the logs don't break down failure reasons by day, so the link to the registration reason is inferred.\n\n**2) Evidence**\n- Today's failure rate is 23.0%. On 11-09 to 11-15 it was 0.7–2.7% a day. [E1]\n- On the latest day, MOCKB failed on 69.9% of 83 requests. MOCKA failed on 3.1% of 195. MOCKB accounts for 90.6% of today's failures, and the problem was already present in the first hour (00:00 UTC). [E1]\n- By template today, tpl-0001 failed on 36.6% of 164 requests. tpl-0002 failed on 2.7% and tpl-0003 on 5.1%. [E1]\n- The two routes fail at similar rates today (route 5 at 25.0%, route 4 at 22.4%). The route is therefore not the dividing line. [E1]\n- Over the whole window, \"Template not registered\" caused 56 of the 156 failures. Our side fixes this; it means the message text matches no registered template. The same window's other failures are recipient-side background failures: unreachable (57), opted out (29) and expired (14). [E1] This fits the known registration pattern [K-registration]. The logs give no per-day reason split, so I can't confirm that today's MOCKB failures are all this reason.\n- Volume is not down. Today has 278 requests by midday, in line with normal days. The failures are real rejected rows, not missing requests. [E1]\n- Phone-number format is fine. All 4,949 recipients have 12 digits, and no user record has an empty dial code. [E1][E2]\n- The delivery delay for delivered messages is normal: median 6 s, maximum 9 s. [E1]\n- Repeat requests are 1.4% of today's requests, in the normal 0.8–1.9% range. [E1]\n- Credit is healthy at 4,200. [E4]\n- The recent commits touch resend limits, retry, logging and expiry wording. By their subjects, none touches templates or senders. The commit dates are masked, so I can't place them against 11-16. A subject can still hide a cause. [E3]\n\n**3) Not checked / limits**\n- Ruled out: credit exhaustion [E4]; empty dial codes [E1][E2]; a drop in request volume [E1]; late delivery of delivered messages [E1]; today's repeat requests [E1].\n- Still open: whether tpl-0001 and MOCKB failures are the same rows. Today's data gives each separately, not combined.\n- Still open: the per-day failure reason, which I could not see.\n- Not checked: 11-03 to 11-08 has no log export. That is a missing file, not zero traffic, so earlier history is unknown. [E1]\n- The user-data counts are current, not historical. Hand edits could hide earlier problems. [E2]\n- Not available: `check_numbers`, because no phone numbers were given. I therefore can't name specific affected users.\n- Not checked: `check_code_api`, because it needs your approval and I did not request it. The failures are rejected delivery rows, which points away from the API.\n- Not checked: `check_message_queue`. Delivery delay is normal, so I did not look at it.\n- Cannot be seen with these tools: the provider-side registration status, the database scheduler, and the code-validation logic. No evidence points at the last two.\n\n**4) Suggested next steps**\n- Ask whoever manages the provider account whether MOCKB's registration or the tpl-0001 template approval changed, lapsed or was rejected around 00:00 UTC on 11-16.\n- Temporarily send tpl-0001 traffic through MOCKA if that is allowed. MOCKA is healthy today. [E1]\n- Re-pull the logs in a few hours to see whether the rate falls once it is fixed.\n\n**5) Information needed from you**\n1. Delivery-log export (CSV, UTC, failed rows included) for 2026-11-03 to 2026-11-08 – shows whether MOCKB or tpl-0001 had problems before today – ask the log export owner.\n2. A typed note from engineering or DevOps on any sender or template change, or on provider-side registration status, since 2026-11-15 – confirms or rules out the registration cause – ask engineering.\n3. Phone numbers of a few affected users (via `--number` or `--prompt-numbers`) – lets me check whether they all use MOCKB or tpl-0001 – you provide these."
+  },
+  {
+   "scenario": "S7",
+   "from_run": "round-2",
+   "tools_called": [
+    "fetch_delivery_logs",
+    "get_credit_balance",
+    "check_message_queue",
+    "check_user_data",
+    "recent_code_changes"
+   ],
+   "seconds": 20.6,
+   "model_calls": 2,
+   "input_tokens": 15240,
+   "output_tokens": 2115,
+   "expected_outcome": "no_issue",
+   "score": {
+    "checks": {
+     "outcome": {
+      "pass": false,
+      "got": "inconclusive",
+      "expected": "no_issue"
+     },
+     "cause_category": {
+      "pass": true,
+      "expected": "none",
+      "words_found": []
+     },
+     "must_mention": {
+      "pass": false,
+      "missing": [
+       "no issue"
+      ]
+     },
+     "must_not_claim": {
+      "pass": false,
+      "claimed_in_verdict": [
+       "cause"
+      ]
+     },
+     "shortest_path": {
+      "pass": false,
+      "expected_tools": [
+       "fetch_delivery_logs",
+       "check_code_api"
+      ],
+      "not_called": [
+       "check_code_api"
+      ],
+      "tool_calls": 5,
+      "extra_steps": 3
+     },
+     "citations": {
+      "pass": true,
+      "cited": [
+       "E1",
+       "E2",
+       "E3",
+       "E4",
+       "E5"
+      ],
+      "unknown": []
+     },
+     "section5": {
+      "pass": true,
+      "present": true,
+      "says_none": false
+     }
+    },
+    "passed": 3,
+    "total": 7,
+    "all_passed": false
+   },
+   "report": "**1) Verdict:** Inconclusive, with no sign of a system-wide fault in the data I could check (medium confidence for 2026-11-09 to 11-16). Codes were requested, sent and delivered at normal rates. The complaints may be individual cases, or they may come from causes these tools can't see.\n\n**2) Evidence**\n- **Failures:** 2.0% of 5,014 requests failed over 11-09 to 11-16. Today's rate is 1.8%, and the daily range is 1.2–2.7% [E1].\n- **Failure reasons:** all three are the usual recipient-side kind [E1]:\n  - Recipient unreachable: 62.\n  - Recipient opted out: 31.\n  - Message expired (a network issue): 6.\n- **Concentration:** no route, sender or template stands out today [E1].\n- **Volume:** 271 requests by about noon today, against 474 on the previous Monday and 511–831 on other recent days. That is plausible for half a day, with no sudden drop [E1].\n- **Speed:** the provider's delivery delay is a median of 6 s and a 90th percentile of 9 s [E1]. Every queue row was sent in under 30 s, and nothing is waiting now [E3]. The queue table is current [E3]. It can't tell code messages from other text messages [E3].\n- **Credit:** the balance is 4,200, enough for about 84,000 requests. This is today's balance, not a past one [E2].\n- **Repeat requests:** 62 repeats (1.2% of requests) [E1]. A newer code replaces the older one, so someone who types the first code is told it is invalid. This is small, but it could explain a few complaints. The logs can't show which code a user typed [E1].\n- **User records:** no empty dial codes or locales on any day [E4]. This reflects current data, and hand edits could hide earlier problems.\n- **Other API errors:** two \"duplicate within 10 seconds\" refusals on 11-15, which are normal at that level [E1].\n- **Recent code changes:** subjects mention resend limit, retry on provider timeout, and logging and wording tweaks [E5]. The commit dates are masked, so I can't tell which fall inside the complaint window. No commit subject mentions code validation [E5].\n\n**3) Not checked / limits**\n- **Ruled out for 11-09 to 11-16:** background-failure spike [E1], credit exhaustion [E1][E2], template or registration failures [E1], empty dial codes (current data only) [E4], late delivery [E1][E3], and a volume drop [E1].\n- **No data for 11-03 to 11-08:** those export files are missing. This does not mean no codes were requested [E1]. If the complaints concern those days, I can't assess them.\n- **API failing or hanging, or a stale credential:** not tested. The test sends one real message and needs your approval. Normal volume and no new failures make a fault less likely, but only the test can show the API's current behaviour.\n- **Old code still accepted after a newer one:** this leaves no trace in logs. It needs a code review of validation.\n- **Scheduled database jobs stopped:** no tool here can see this.\n- **Repeats replacing codes:** a possible explanation for a few \"invalid code\" complaints, but not provable from the logs [E1].\n- **Per-user checks:** not possible, because no phone numbers were supplied.\n\n**4) Suggested next steps**\n- Run the API test to confirm the API answers now and that the provider log shows the request. The provider log can lag by minutes, so a miss right after the test is not a fault.\n- Ask the complainants when they tried (UTC date and time) and what they saw: no code, a late code, or an \"invalid\" code.\n- If complaints say \"invalid code\", have engineering review the resend limit change and how validation picks a code.\n\n**5) Information needed from you**\n1. Approve the API test - checks that the API answers and reaches the provider now - run `python3 investigate.py --continue --approve-probe`.\n2. Dates and times (UTC) of the complaints, and what each person saw - lets me match them to the logs and tell \"no code\" from \"late\" from \"invalid\" - a typed note.\n3. Delivery-log export (CSV, UTC, failed rows included) for 2026-11-03 to 11-08 - fills the gap in case the complaints fall in those days - ask whoever manages the provider exports.\n4. Phone numbers of affected users (as aliases via `--number`, `--numbers-file` or `--prompt-numbers`) - lets me check each user's requests and repeats - you provide them when running the tool.\n5. Answer on whether code validation accepts only the latest code, and whether the scheduled database jobs have been running - covers the two causes no tool here can see - ask engineering (validation) and the DBA (jobs)."
+  },
+  {
+   "scenario": "S8",
+   "from_run": "round-1",
+   "tools_called": [
+    "fetch_delivery_logs",
+    "get_credit_balance",
+    "check_message_queue",
+    "check_user_data",
+    "recent_code_changes",
+    "fetch_delivery_logs",
+    "fetch_delivery_logs",
+    "check_code_api"
+   ],
+   "seconds": 29.9,
+   "model_calls": 4,
+   "input_tokens": 45519,
+   "output_tokens": 3029,
+   "expected_outcome": "inconclusive",
+   "score": {
+    "checks": {
+     "outcome": {
+      "pass": true,
+      "got": "inconclusive",
+      "expected": "inconclusive"
+     },
+     "cause_category": {
+      "pass": true,
+      "expected": "none",
+      "words_found": []
+     },
+     "must_mention": {
+      "pass": true,
+      "missing": []
+     },
+     "must_not_claim": {
+      "pass": true,
+      "claimed_in_verdict": []
+     },
+     "shortest_path": {
+      "pass": true,
+      "expected_tools": [
+       "fetch_delivery_logs",
+       "check_code_api"
+      ],
+      "not_called": [],
+      "tool_calls": 8,
+      "extra_steps": 6
+     },
+     "citations": {
+      "pass": true,
+      "cited": [
+       "E1",
+       "E2",
+       "E3",
+       "E4",
+       "E5",
+       "E7",
+       "E8"
+      ],
+      "unknown": []
+     },
+     "section5": {
+      "pass": true,
+      "present": true,
+      "says_none": false
+     }
+    },
+    "passed": 7,
+    "total": 7,
+    "all_passed": true
+   },
+   "report": "1) **Verdict:** The drop is real, but I can't say why yet. Confidence that the drop is real: high. Confidence in any cause: low (inconclusive). The evidence points to requests not being made or not reaching the provider, not to delivery failing.\n\n2) **Evidence**\n- **Today is about half of normal.** Last Friday had 292 requests from 00:00 to 11:59 UTC [E7]. Today had about 128 over the same hours [E1].\n- **Overnight is normal, the morning is low.** From 00:00 to 06:59, today had 1–4 requests an hour [E1], and Friday had 2–6 an hour [E7]. From 07:00 today had 16, 24, 24, 29 and 18 an hour [E1]. Friday ran 25–67 an hour over the same hours [E7]. The gap starts around 06:00–07:00 UTC.\n- **No new failures.** Today's failure rate is 2.3%, in line with 1.6–2.5% on earlier days [E1]. The failures are the usual recipient-side kind: unreachable, opted out, or expired. No route, sender or template stands out [E1].\n- **Credit is fine.** The balance is 4200, enough for about 84,000 requests [E2]. There are no credit-refusal errors (E101) in the failed-call log. The only refused calls were 2 harmless duplicates on 11-15 [E1]. This is the balance now, not at 06:00 [E2].\n- **The queue is not holding messages.** Nothing is waiting, and every text row was sent within 30 seconds [E3]. The newest row was created at 11:56 [E3]. The queue can't tell code messages from other texts [E3].\n- **The API works right now.** The test call answered 200 in 119 ms. The provider showed the test message as delivered [E8]. This says nothing about 06:00–11:00.\n- **User data looks normal.** No empty dial codes or locales on any day, and 22 new users today [E4]. These are current counts, and later hand edits could hide earlier problems [E4].\n- **Recent code changes look harmless by subject.** They cover expiry wording, logging, \"retry on provider timeout\" and logging tidy-up. Only subjects and file names were read, not the code [E5].\n- **Repeat requests are normal.** They are 1.6% of requests today [E1].\n- **Context.** Last Monday was low overall (482 requests, against 755–796 on Tuesday to Friday) [E1]. I don't have its morning hours, so I can't say whether a low Monday morning is usual.\n\n3) **Not checked / limits**\n- **Ruled out:** credit exhausted [E2][E1], a failure spike or template/registration problem [E1], a queue backlog or late delivery [E3][E1], missing log files (none missing) [E1], and a stale credential or API outage at 12:00 [E8].\n- **Still open:**\n  - The API may have failed or hung earlier this morning. Only the API server's own log can show that.\n  - Fewer requests may have been sent by the app or website, for example a front-end release, an outage, or less traffic. No tool here sees this.\n  - Scheduled database jobs. No tool here sees them.\n  - Empty dial codes in the past. Hand edits could hide them [E4].\n  - Code-level faults, such as old codes still working. These leave no trace in the logs [E5].\n- **Could not use:** the per-number check, because you gave no phone numbers.\n\n4) **Suggested next steps**\n- Ask engineering for the API server's error and latency log from 05:00 to 12:00 UTC today.\n- Compare today's morning with an ordinary Monday morning.\n- Check whether the app or website changed or had an outage around 06:00–07:00 UTC.\n- Re-check the hourly volume in an hour. If it stays at about half of normal, the drop is persistent.\n\n5) **Information needed from you**\n1. API server log, 05:00–12:00 UTC today, errors, timeouts and request counts per hour. It would confirm or rule out an API fault before the provider. Ask engineering or DevOps.\n2. Count of login or sign-in attempts per hour from the app or analytics, today against last Friday. It would show whether users are asking for fewer codes or requests are being lost. Ask the product analytics or front-end team.\n3. Deployments, releases or config changes between 04:00 and 08:00 UTC today. It would tie the drop to a change. Ask engineering with a typed note.\n4. A delivery-log export for the earlier Mondays, with hourly volume. It would show whether low Monday mornings are normal. Provide it as a CSV, UTC, failed rows included."
+  },
+  {
+   "scenario": "S9",
+   "from_run": "round-2",
+   "tools_called": [
+    "fetch_delivery_logs",
+    "get_credit_balance",
+    "recent_code_changes",
+    "check_user_data",
+    "check_message_queue"
+   ],
+   "seconds": 17.3,
+   "model_calls": 2,
+   "input_tokens": 15708,
+   "output_tokens": 2139,
+   "expected_outcome": "cause_found",
+   "score": {
+    "checks": {
+     "outcome": {
+      "pass": true,
+      "got": "cause_found",
+      "expected": "cause_found"
+     },
+     "cause_category": {
+      "pass": true,
+      "expected": "template_rejected",
+      "words_found": [
+       "template"
+      ]
+     },
+     "must_mention": {
+      "pass": true,
+      "missing": []
+     },
+     "must_not_claim": {
+      "pass": true,
+      "claimed_in_verdict": []
+     },
+     "shortest_path": {
+      "pass": true,
+      "expected_tools": [
+       "fetch_delivery_logs"
+      ],
+      "not_called": [],
+      "tool_calls": 5,
+      "extra_steps": 4
+     },
+     "citations": {
+      "pass": true,
+      "cited": [
+       "E1",
+       "E2",
+       "E3",
+       "E4",
+       "E5"
+      ],
+      "unknown": []
+     },
+     "section5": {
+      "pass": true,
+      "present": true,
+      "says_none": false
+     }
+    },
+    "passed": 7,
+    "total": 7,
+    "all_passed": true
+   },
+   "report": "**1) Verdict:** Most likely a template registration problem on template tpl-0003, starting around 04:00 UTC today. Every tpl-0003 message today failed. Confidence is medium-high. The failure-reason breakdown by template isn't available, so the link to \"Template not registered\" is not confirmed.\n\n**2) Evidence**\n- Today's failure rate is 16.6%, against 1.5–2.7% on 9–15 Nov. [E1]\n- Today, tpl-0003 failed 42 of 42 requests (100%). Other templates failed 1.3% of the time. tpl-0003 accounts for 93% of today's failures, and the first bad hour was 04:00 UTC. [E1]\n- The failures are not tied to one route or sender. Both routes (4 and 5) and both senders (MOCKA and MOCKB) show 13–18% failure today, which fits a template-level problem. [E1]\n- The window has 39 \"Template not registered\" failures. The glossary classes these as Registration, \"ours to fix\", meaning a template or sender registration problem with the provider. [E1] That count is close to tpl-0003's 42 failures today. The data doesn't show which reason belongs to which template.\n- Background failures look normal. Recipient unreachable (66), opted out (29) and expired (13) are recipient-side or network reasons. The 2–3% daily rate before today is consistent with them. [E1]\n- 3 failures carry a reason that is not documented in the glossary. The reason text contains an instruction-like string, which I treated as data and ignored. Its meaning is unknown; the glossary lists the provider as the one to ask. [E1]\n- Credit is healthy at 4,200, enough for about 84,000 requests. [E2] This is the balance now, not at earlier times.\n- Delivery is fast: median 6 s, maximum 9 s. [E1] All queue rows were sent in under 30 s, and nothing is waiting. [E5]\n- Every recipient number is 12 digits long. [E1] No user has an empty dial code, which counts as current data only. [E4]\n- Repeat requests are about 1.1% of requests and stable, at 1.5% today. [E1]\n- The recent commits are about expiry wording, resend limit, logging, retry on timeout and the initial gateway. Their dates are masked in the tool output, and none obviously touches templates or registration. [E3] This does not exclude a code cause, since only subjects and file names are shown.\n\n**3) Not checked / limits**\n- Ruled out: credit exhaustion [E2], empty dial code on today's data [E4], late delivery [E1][E5], and recipient-side background noise as the cause of today's spike [E1].\n- Missing log data: 3–8 Nov has no exports. This is a missing file, not zero traffic. [E1]\n- Records edited by hand: the user-data counts are current, not historical, so they can't rule out an earlier problem. [E4]\n- Template registration: the failure reasons are not broken down per template. Only the provider or registration records can confirm that tpl-0003 lost its registration.\n- API failure or hang and stale credential: not tested, because check_code_api needs your approval. The delivery rows show no volume drop, but today's volume is only a part-day figure.\n- Repeated requests replacing earlier codes: no per-number check, because check_numbers is unavailable. You gave no phone numbers.\n- Scheduled database jobs and the code-validation logic: no tool here can see them.\n\n**4) Suggested next steps**\n- Ask whoever manages the provider account whether tpl-0003's registration or text changed or lapsed around 04:00 UTC on 16 Nov.\n- Check which tpl-0003 text and sender are in use, and compare them with the registered template.\n- Once tpl-0003 is fixed, re-run the logs and confirm its failure rate returns to about 2%.\n- Ask the provider what the undocumented failure reason means.\n\n**5) Information needed from you**\n1. Template change history for tpl-0003 (what changed and when, especially 15–16 Nov) and its registration status with the provider. Ask engineering or whoever manages the provider account, and send it as a typed note.\n2. Per-template failure reasons for 16 Nov. Re-export the delivery log as a CSV in UTC, with failed rows included, so the reason can be matched to the template.\n3. Optional: a delivery-log export for 3–8 Nov, which would fill the gap and give a longer baseline. Send it as a CSV in UTC with failed rows included."
+  },
+  {
+   "scenario": "S10",
+   "from_run": "round-1",
+   "tools_called": [
+    "fetch_delivery_logs",
+    "get_credit_balance",
+    "check_user_data",
+    "check_message_queue",
+    "recent_code_changes"
+   ],
+   "seconds": 19.9,
+   "model_calls": 3,
+   "input_tokens": 25577,
+   "output_tokens": 2318,
+   "expected_outcome": "cause_found",
+   "score": {
+    "checks": {
+     "outcome": {
+      "pass": true,
+      "got": "cause_found",
+      "expected": "cause_found"
+     },
+     "cause_category": {
+      "pass": true,
+      "expected": "release_change_recipient_format",
+      "words_found": [
+       "recipient",
+       "format"
+      ]
+     },
+     "must_mention": {
+      "pass": false,
+      "missing": [
+       "message_gateway"
+      ]
+     },
+     "must_not_claim": {
+      "pass": true,
+      "claimed_in_verdict": []
+     },
+     "shortest_path": {
+      "pass": false,
+      "expected_tools": [
+       "fetch_delivery_logs",
+       "check_code_api",
+       "recent_code_changes"
+      ],
+      "not_called": [
+       "check_code_api"
+      ],
+      "tool_calls": 5,
+      "extra_steps": 2
+     },
+     "citations": {
+      "pass": true,
+      "cited": [
+       "E1",
+       "E2",
+       "E3",
+       "E4",
+       "E5"
+      ],
+      "unknown": []
+     },
+     "section5": {
+      "pass": true,
+      "present": true,
+      "says_none": false
+     }
+    },
+    "passed": 5,
+    "total": 7,
+    "all_passed": false
+   },
+   "report": "1) **Verdict:** Yes, there is an incident, with high confidence that it exists. The likely cause is that the number we send to the provider is malformed, with medium confidence. Every code request today has failed, and failures began part-way through yesterday.\n\n2) **Evidence**\n- Failure rate was steady at 1.9–2.6% a day from 9 to 14 Nov. It rose to 24.0% on 15 Nov and 100% on 16 Nov, where all 322 requests failed in every hour from 00:00 to 11:59 [E1].\n- The failures are not limited to one route, sender or template. All of them hit 100% today, and the tool found no single concentration [E1]. This points to something common to every request, not a single registration problem.\n- The main failure reason is \"Invalid recipient format\", with 447 failures. Its meaning is that the number sent to the provider is not a full valid number, for example a missing country prefix. Exactly 447 recipients have 10-digit numbers, while the other 4,582 have the normal 12 digits [E1]. These two counts match.\n- By my arithmetic, the failures above the usual ~2% on 15 and 16 Nov come to about 440, close to 447. That is an inference, because the logs don't break down the reasons per day [E1].\n- The other failure reasons are small: \"Recipient unreachable\" (59), \"Recipient opted out\" (26) and \"Message expired\" (17). Their size is consistent with the normal 2% background of recipient-side failures [E1].\n- Recent commits include \"Trim dial code for domestic routes\" in the message gateway (file `dispatch.py`). It is a lead only. The commit dates are masked, so I can't tell whether it was deployed just before the failures began. I also haven't read the code [E5].\n- Credit is healthy at 4,200, enough for about 84,000 requests. This is the balance now, not at an earlier time [E2].\n- The queue is not holding messages. All rows were handed to the provider within 30 seconds, and the newest row is recent. The queue table holds both push and SMS rows, and the tool can't tell code rows from other texts [E4].\n- Delivery delay is normal, at a median of 5.5 s and a maximum of 9 s [E1].\n- Repeat requests are rare, at 1.2% of requests (1.9% today). They don't explain codes that never arrive [E1].\n- Current user data shows 0 empty dial codes or locales on any day [E3]. This is current data only, and hand edits could hide an earlier problem.\n\n3) **Not checked / limits**\n- Ruled out: credit exhausted [E2], queue delay [E1][E4], a single registration/template/sender fault [E1], repeat-request replacement as the main cause [E1], and normal background failures as the explanation [E1].\n- Missing data: there are no logs for 3–8 Nov. That is a missing export, not zero traffic [E1]. It doesn't affect the current incident.\n- Empty dial code on user records: not confirmed. The count is 0 now, but it is current-only and can't show history [E3].\n- Gateway code change (`dispatch.py`): open. The deploy time isn't known and I can't read the code [E5].\n- API failure or stale credential: not tested. This needs the PM's approval to call the real API.\n- Per-number checks: unavailable because no phone numbers were supplied, so I couldn't see a given user's retry history.\n- Scheduled database jobs: no tool here can see them.\n\n4) **Suggested next steps**\n- Ask engineering to check whether the \"Trim dial code for domestic routes\" change was deployed on or just before 15 Nov. If so, consider rolling it back.\n- Ask engineering to look at the API server log for what number is built and sent in a request.\n- Once the cause is fixed, re-check the logs. The failure rate should return to about 2%.\n- Users who hit the fault will need to request a new code after the fix.\n\n5) **Information needed from you**\n1. Run the API test (it sends one real message to your test number): `python3 investigate.py --continue --approve-probe`. This shows whether a fresh request fails or sends a short number.\n2. Deployment time of gateway commit 4e8f9da, and when 15 Nov failures first appeared (ask engineering or DevOps). This would confirm or reject the code-change lead.\n3. One or two affected users' numbers (use `--number` or `--prompt-numbers`). This would show their request history and confirm the 10-digit pattern."
+  },
+  {
+   "scenario": "S11",
+   "from_run": "round-1",
+   "tools_called": [
+    "fetch_delivery_logs",
+    "get_credit_balance",
+    "check_message_queue",
+    "recent_code_changes",
+    "check_user_data"
+   ],
+   "seconds": 21.9,
+   "model_calls": 3,
+   "input_tokens": 23701,
+   "output_tokens": 2358,
+   "expected_outcome": "inconclusive",
+   "score": {
+    "checks": {
+     "outcome": {
+      "pass": true,
+      "got": "inconclusive",
+      "expected": "inconclusive"
+     },
+     "cause_category": {
+      "pass": true,
+      "expected": "coverage_gap",
+      "words_found": [
+       "gap"
+      ]
+     },
+     "must_mention": {
+      "pass": false,
+      "missing": [
+       "02:00"
+      ]
+     },
+     "must_not_claim": {
+      "pass": true,
+      "claimed_in_verdict": []
+     },
+     "shortest_path": {
+      "pass": true,
+      "expected_tools": [
+       "fetch_delivery_logs"
+      ],
+      "not_called": [],
+      "tool_calls": 5,
+      "extra_steps": 4
+     },
+     "citations": {
+      "pass": true,
+      "cited": [
+       "E1",
+       "E2",
+       "E3",
+       "E4",
+       "E5"
+      ],
+      "unknown": []
+     },
+     "section5": {
+      "pass": true,
+      "present": true,
+      "says_none": false
+     }
+    },
+    "passed": 6,
+    "total": 7,
+    "all_passed": false
+   },
+   "report": "1) **Verdict:** Provider-side failures do not explain the missing codes this morning (moderate confidence). Today's failure rate is 2.8%, in line with normal. However, 64 more text rows were handed to the provider today than the provider's log shows. That gap is unexplained, so the cause is **inconclusive**.\n\n2) **Evidence**\n- Today, 2026-11-16 (as of 12:03), has 216 delivery rows and a 2.8% failure rate (6 of 216). Daily rates from 11-09 to 11-15 ran 1.3–3.0%, and overall was 2.1% [E1].\n- All failures have recipient-side or network reasons: unreachable phone (49), opted out (29) and message expired (23). No new failure category appeared [E1]. These are not sending-side faults.\n- No route, sender or template carries the failures today [E1]. The only notable hour is 08:00 UTC, with 3 failures of 38 requests (7.9%). That is too few rows to read much into, and the next hour had none [E1].\n- Delivery delay is normal: median 5s, slowest 9s [E1]. Nothing is waiting in the queue, and every message was sent within 30 seconds [E3]. The balance is 4,200 credits, about 84,000 requests [E2].\n- **Open lead:** the queue shows 280 text (SMS) rows sent today, but the provider log shows only 216 rows. On 11-09 to 11-15 the two matched exactly (for example 464 and 464 on 11-09) [E3][E1].\n  - The live provider log may be lagging, or some of these rows may be non-code texts. The queue cannot tell code rows from other texts [E3].\n  - The gap could also mean some requests were handed over but never logged by the provider. I cannot tell which from the data here.\n- Repeat requests were 3.2% of requests today, against 1.4% overall [E1]. A newer code replaces the older one, so a user who types the earlier code is told it is invalid. This is a possible, minor contributor. The logs cannot show which code users typed [E1].\n- Recent commits are about logging, wording and a retry on provider timeout. None touches code validation or templates by subject, but the code itself was not read [E4].\n- There are no empty dial codes or locales on any day, including today [E5]. This is current data, not a historical record.\n\n3) **Not checked / limits**\n- Ruled out with evidence: credit exhaustion [E2], template or registration failures [E1], a queue backlog or late delivery [E3], and empty dial codes in current data [E5].\n- Open: the verification API failing or hanging, or a stale credential. Not tested yet, and a healthy API now would not prove the morning was fine.\n- Open: the 64-row gap between queue and provider log.\n- Open: no hourly baseline. The log has no rows for hours 02–07 today, and I have no earlier hourly volumes to compare against.\n- Open: 2026-11-03 to 11-08 have no log data. This is a missing export, not zero traffic [E1].\n- Open: an older code still working after a newer one was issued. Only a code review can show it.\n- Open: stopped scheduled database jobs. No tool here can see them.\n- Open: hand-edited records could hide earlier problems [E5].\n- Not available: check_numbers, because no phone numbers were given. I can't look at the affected users' own requests.\n\n4) **Suggested next steps**\n- Approve the API test, then re-check the provider log a few minutes later. A miss right after the call is not a fault, because the live log lags.\n- Re-run the log fetch in an hour to see whether the 216 vs 280 gap closes.\n- Ask engineering to look at the API server log for errors this morning.\n\n5) **Information needed from you**\n1. Approval of one test message to your test number, which shows whether the API answers and the provider logs it. Run: `python3 investigate.py --continue --approve-probe`\n2. The time window of the complaints, and roughly how many users reported them, as a typed note. This shows whether they line up with the 08:00 UTC failures or with the gap.\n3. One or two affected users' phone numbers, via `--number` or `--prompt-numbers`. This shows whether their requests reached the provider at all, or were repeated.\n4. A delivery-log export for 11-03 to 11-08 (CSV, UTC, failed rows included), from whoever holds the exports. This gives a longer baseline.\n5. Ask engineering whether the 280 text rows today include non-code messages, and what the API server log shows from 06:00 to 12:00 UTC. This explains the gap."
+  },
+  {
+   "scenario": "S12",
+   "from_run": "round-2",
+   "tools_called": [
+    "fetch_delivery_logs",
+    "get_credit_balance",
+    "check_user_data",
+    "check_message_queue",
+    "recent_code_changes"
+   ],
+   "seconds": 14.2,
+   "model_calls": 2,
+   "input_tokens": 14208,
+   "output_tokens": 1670,
+   "expected_outcome": "cause_found",
+   "score": {
+    "checks": {
+     "outcome": {
+      "pass": true,
+      "got": "cause_found",
+      "expected": "cause_found"
+     },
+     "cause_category": {
+      "pass": true,
+      "expected": "credit_exhausted",
+      "words_found": [
+       "credit"
+      ]
+     },
+     "must_mention": {
+      "pass": true,
+      "missing": []
+     },
+     "must_not_claim": {
+      "pass": true,
+      "claimed_in_verdict": []
+     },
+     "shortest_path": {
+      "pass": true,
+      "expected_tools": [
+       "fetch_delivery_logs"
+      ],
+      "not_called": [],
+      "tool_calls": 5,
+      "extra_steps": 4
+     },
+     "citations": {
+      "pass": true,
+      "cited": [
+       "E1",
+       "E2",
+       "E3",
+       "E4",
+       "E5"
+      ],
+      "unknown": []
+     },
+     "section5": {
+      "pass": true,
+      "present": true,
+      "says_none": false
+     }
+    },
+    "passed": 7,
+    "total": 7,
+    "all_passed": true
+   },
+   "report": "**1) Verdict:** The most likely cause is that the account ran out of credit, so the provider refused code requests before sending them. Confidence is high. The refusals, the zero balance and the volume drop all match. [E1][E2]\n\n**2) Evidence**\n- The provider account balance is 0.0 right now. [E2]\n- The failed-call log shows 251 refusals on 2026-11-16, all with error E101, \"Insufficient credit\". That error means the account had no credit, so the request was refused before it was submitted. These calls leave no delivery row. [E1]\n- Delivery volume today is 15 requests, against 490 to 813 per day over the previous 7 days. All 15 came in the first hours, at hours 0 to 2 UTC. [E1]\n- Today's failure rate is 0.0%, so the problem shows up as missing rows, not failed rows. [E1]\n- Over the window the failure rate is 2.1%. The daily rate is 1.4% to 2.6%. The reasons are all recipient-side or network: unreachable phone, opted out, message expired. This is normal background noise, not the incident. [E1]\n- Delivery delay is normal: median 5 s, p90 9 s. [E1]\n- The queue has nothing waiting. Its newest row was created at 11:54 UTC, so the data is recent. All rows are SENT, and every one waited under 30 s. [E4]\n- The queue counts cannot tell code messages from other text messages. SENT means handed to the provider, not received. [E4]\n- No user-data problem found: 0 empty dial codes or locales on every day. [E3] These are current counts, so they cannot prove that earlier records were clean.\n- Recent commits touch only logging, wording and a provider-timeout retry. Nothing points at templates or registration. I did not read the code, so I cannot say these are harmless. [E5]\n- The balance is the balance now. It does not show when credit ran out. The \"since early morning\" timing is consistent with the logs, because requests drop off after hour 2 UTC. [E1][E2]\n\n**3) Not checked / limits**\n- Ruled out: normal background noise as the cause [E1]; template or registration failures (no failures today, no relevant commits) [E1][E5]; empty dial codes [E3]; late delivery [E1][E4]; missing exports (no missing dates) [E1]; heavy repeat requests (1.2% of requests) [E1].\n- Still open: whether the API itself is failing. I did not run the API check, and the credit explanation already fits. The API test is optional. Because the account has no credit, it would most likely just show the same refusal.\n- Still open: stale or rejected credentials on the API call. These are not seen in the logs, only E101.\n- Cannot be checked with these tools: whether the scheduled database jobs have stopped, and what the API server's own log says.\n- check_numbers is unavailable because no phone numbers were given. It would only matter for a single user's complaint.\n- The exact time the credit ran out is unknown. The balance history is not available.\n\n**4) Suggested next steps**\n- Top up the provider account now. Credit is shared by every message type, so push and other texts may also be affected. [E2]\n- After the top-up, re-run the delivery logs and confirm requests return to the normal hourly volume and E101 stops.\n- Ask whoever owns the provider account why the credit ran out. For example, was there a spike in sends, or was a low-balance alert missing? Then set a low-balance alert.\n- Users who asked for a code since early morning were refused. They will need to request a new code after the top-up.\n\n**5) Information needed from you:**\n1. The provider's billing or usage history for 2026-11-15 to 2026-11-16 - it shows when credit hit zero and what used it, which would confirm the timing - ask whoever owns the provider account, or send it as a typed note or CSV.\n2. After the top-up, tell me and I will re-fetch the delivery logs for 2026-11-16 - this confirms the fix."
+  },
+  {
+   "scenario": "S13",
+   "from_run": "round-2",
+   "tools_called": [
+    "fetch_delivery_logs",
+    "get_credit_balance",
+    "check_message_queue",
+    "check_user_data",
+    "recent_code_changes"
+   ],
+   "seconds": 19.4,
+   "model_calls": 2,
+   "input_tokens": 14047,
+   "output_tokens": 2205,
+   "expected_outcome": "inconclusive",
+   "score": {
+    "checks": {
+     "outcome": {
+      "pass": false,
+      "got": "cause_found",
+      "expected": "inconclusive"
+     },
+     "cause_category": {
+      "pass": true,
+      "expected": "unchecked_pre_submission_failures",
+      "words_found": [
+       "pre",
+       "failures"
+      ]
+     },
+     "must_mention": {
+      "pass": false,
+      "missing": [
+       "E102",
+       "E103"
+      ]
+     },
+     "must_not_claim": {
+      "pass": true,
+      "claimed_in_verdict": []
+     },
+     "shortest_path": {
+      "pass": false,
+      "expected_tools": [
+       "fetch_delivery_logs",
+       "check_code_api"
+      ],
+      "not_called": [
+       "check_code_api"
+      ],
+      "tool_calls": 5,
+      "extra_steps": 3
+     },
+     "citations": {
+      "pass": true,
+      "cited": [
+       "E1",
+       "E2",
+       "E3",
+       "E4",
+       "E5"
+      ],
+      "unknown": []
+     },
+     "section5": {
+      "pass": true,
+      "present": true,
+      "says_none": false
+     }
+    },
+    "passed": 4,
+    "total": 7,
+    "all_passed": false
+   },
+   "report": "1) **Verdict:** Most likely the messaging account ran out of credit, so no codes have reached the provider since about 03:00 UTC today. Confidence is medium-high. It is not fully confirmed, because the credit balance is only a current reading and the failed-call log was not checked.\n\n2) **Evidence**\n- The account balance is 0.0 now, with 0 requests remaining [E2]. This matches the known \"credit exhausted\" pattern. That pattern shows up as a drop in volume with no new failed rows.\n- Today has only 15 requests in the provider log, against 519–793 on each of the previous 7 days [E1]. All 15 came in hours 00–02 UTC, and no hours after 02 appear [E1].\n- Failed rows did not increase. Today shows 0.0% failures, and no route, sender or template stands out [E1]. The earlier failure rate was 1.3–3.2% a day, all recipient-side or network reasons [E1]. That is normal background noise, so nothing new is failing at the provider.\n- The message queue is empty and the worker sent everything within 30 seconds [E3]. Today's SMS rows number 15, the same as the provider log [E3]. So SMS requests stopped being created or submitted, and the queue is not holding them back. The queue check cannot tell code messages from other texts [E3].\n- People are still signing up: 24 new users today, which is normal [E4]. Dial code and locale are empty for none of them [E4]. These counts are current, not historical.\n- The recent commits touch logging, retry and wording only [E5]. Nothing looks related, but the commit contents were not read [E5].\n\n3) **Not checked / limits**\n- Ruled out, with evidence: normal background failures [E1], template or registration failures [E1][E5], late delivery [E1][E3], a missing export [E1], empty dial codes [E4], and repeated requests replacing codes [E1].\n- Still open:\n  - **API failing or hanging:** the API test needs your approval, so it has not run. A healthy API result would not disprove a credit problem.\n  - **Stale or rejected credential:** this can only be checked through the API test.\n  - **Exact time the credit ran out:** the balance is a current reading only [E2]. The failed-call log, which would show the \"no credit\" error code (E101), is not available to me.\n  - **Scheduled database jobs stopped:** no tool here can see this. The queue itself is moving [E3].\n  - **Code-level fault, where an old code still works after a new one is issued:** this does not fit the evidence, because the problem is missing messages.\n  - **Per-number checks:** I could not run them because no phone numbers were given.\n  - **Hand-edited records:** these could hide earlier problems, and the user-data counts cannot rule that out [E4].\n\n4) **Suggested next steps**\n- Top up the provider credit, or ask whoever owns the account to do it. Then send a test code and watch the volume recover.\n- Ask whoever owns the account whether the balance hit zero around 03:00 UTC today, and whether a low-balance alert was set up.\n- After the top-up, re-run the logs to confirm requests are flowing again. Codes requested since about 03:00 UTC were never sent, so affected users must request a new one.\n- Consider a low-credit alert so this is caught before it blocks users.\n\n5) **Information needed from you**\n1. Approve the API test, which sends one real message to your test number. It shows whether the API answers normally and whether the provider log records the request. Run: `python3 investigate.py --continue --approve-probe`\n2. The failed-call log from the last 24 hours, as a CSV or text file, from engineering or whoever runs the provider account. It would show whether the \"no credit\" error (E101) started around 03:00 UTC, which would confirm the cause.\n3. A typed note from the account owner or finance on when the balance reached zero, and whether credit was topped up or changed today. This would confirm the timing."
+  },
+  {
+   "scenario": "S14",
+   "from_run": "round-2",
+   "tools_called": [
+    "fetch_delivery_logs",
+    "get_credit_balance",
+    "check_user_data",
+    "check_message_queue",
+    "recent_code_changes"
+   ],
+   "seconds": 23.0,
+   "model_calls": 2,
+   "input_tokens": 15618,
+   "output_tokens": 2534,
+   "expected_outcome": "inconclusive",
+   "score": {
+    "checks": {
+     "outcome": {
+      "pass": false,
+      "got": "cause_found",
+      "expected": "inconclusive"
+     },
+     "cause_category": {
+      "pass": true,
+      "expected": "data_quality",
+      "words_found": [
+       "data"
+      ]
+     },
+     "must_mention": {
+      "pass": false,
+      "missing": [
+       "scientific notation",
+       "fresh CSV export"
+      ]
+     },
+     "must_not_claim": {
+      "pass": true,
+      "claimed_in_verdict": []
+     },
+     "shortest_path": {
+      "pass": true,
+      "expected_tools": [
+       "fetch_delivery_logs"
+      ],
+      "not_called": [],
+      "tool_calls": 5,
+      "extra_steps": 4
+     },
+     "citations": {
+      "pass": true,
+      "cited": [
+       "E1",
+       "E2",
+       "E3",
+       "E4",
+       "E5"
+      ],
+      "unknown": []
+     },
+     "section5": {
+      "pass": true,
+      "present": true,
+      "says_none": false
+     }
+    },
+    "passed": 5,
+    "total": 7,
+    "all_passed": false
+   },
+   "report": "1) **Verdict:** Yes, there is a real incident that is still going on. Since about 15 Nov, almost every code request fails at the provider, and 100% failed today. The most likely cause is that our system is sending numbers without the country prefix. Confidence is medium: the pattern fits, but the logs don't show failure reasons per day, so I can't prove the link.\n\n2) **Evidence**\n- The failure rate was 1.2–2.3% a day from 9 to 14 Nov. It rose to 24.0% on 15 Nov and 100% on 16 Nov (304 of 304 requests so far today). [E1]\n- Today's failures are in every hour from 00:00 to 11:00, on both routes, both senders and all three templates. No single one carries them, so this is not a template or sender problem. [E1]\n- The biggest failure reason is \"Invalid recipient format\" with 419 rows. The provider says the number sent is not a full valid number, for example a missing country prefix. [E1]\n- Exactly 419 recipients in the window are 10 digits long. The other 4,546 are 12 digits. The two counts match, so the failing numbers appear to be the short ones. [E1]\n- The reasons are given only for the whole window, not per day. The 10-digit rows probably sit mostly on 15–16 Nov, but I can't confirm that. [E1]\n- The other reasons are small and normal for this kind of failure: unreachable phone (45), message expired (21) and opted out (20). All are on the recipient's side. [E1]\n- Volume did not drop (513–781 requests a day, 304 so far today). Requests are reaching the provider and failing there, so the problem is not the API being down or requests being blocked before they reach the provider. [E1]\n- Repeat requests are low (0.7–2.3% of requests a day), and median delivery time is about 6 seconds. [E1]\n- The queue is clear. Every SMS row was sent in under 30 seconds. [E4]\n- The log shows no sign of paused requests or an empty account. Credit is 4,200, enough for about 84,000 requests at the current rate. This is the balance now, not at the time of the incident. [E2]\n- A recent commit in the code service is titled \"Normalise phone numbers before sending\" (file `send_code.py`). Its date is masked in the tool output, so I can't tell whether it was deployed on 15 Nov. It is a lead, not a cause. [E5]\n- Users with an empty dial code (the country-prefix field on the user record): 0 on every day. This is current data, so it does not rule out an earlier problem that was later fixed by hand. [E3]\n\n3) **Not checked / limits**\n- **Ruled out:**\n  - Credit exhausted [E2].\n  - Template or registration failure [E1].\n  - Queue delay [E4].\n  - Repeat requests as the main cause [E1].\n  - A broken API (requests are reaching the provider) [E1].\n  - Normal background failures as the whole story [E1].\n- **Still open:** an empty dial code on user records. Zero today does not exclude it [E3].\n- **Still open:** a code change that breaks number building. I can't read the code or confirm the deploy date [E5].\n- **No data for 3–8 Nov.** Those are missing export files, not zero traffic. [E1]\n- **Number-level checks not done.** `check_numbers` is unavailable because no phone numbers were provided.\n- **API test not run.** `check_code_api` was not run. Requests are reaching the provider, so I judged it unnecessary.\n- **Not visible to any tool here:** the API server's own log, and the database scheduler's job history.\n\n4) **Suggested next steps**\n- Ask engineering to check urgently whether the number-normalisation change (`ddf12a8`) was deployed around 15 Nov. Also ask them to check whether it now drops the country prefix.\n- If it is the cause, roll it back or fix it. Then watch the failure rate fall back to about 2%.\n- Ask the DBA whether dial codes or phone numbers on user records were edited or imported recently.\n- After the fix, users who failed will need to request a new code.\n\n5) **Information needed from you**\n1. The deploy date and time of commit `ddf12a8` and the last few code releases. This confirms or rules out the commit as the cause. Ask engineering or DevOps.\n2. Whether any user phone numbers or dial codes were edited, imported or migrated since 13 Nov, and whether some are stored without a country prefix. This matters because current data may hide earlier problems. Ask the DBA.\n3. A delivery-log export (CSV, UTC, failed rows included) covering 3–8 Nov. This fills the gap and confirms the normal baseline. Provide it as a file.\n4. Optional: a few example user aliases (not phone numbers) of affected users. Run with `--number`, `--numbers-file` or `--prompt-numbers`. This lets `check_numbers` show their request history."
+  },
+  {
+   "scenario": "S15",
+   "from_run": "round-2",
+   "tools_called": [
+    "fetch_delivery_logs",
+    "check_user_data",
+    "get_credit_balance",
+    "check_message_queue",
+    "recent_code_changes"
+   ],
+   "seconds": 20.5,
+   "model_calls": 3,
+   "input_tokens": 24167,
+   "output_tokens": 2502,
+   "expected_outcome": "cause_found",
+   "score": {
+    "checks": {
+     "outcome": {
+      "pass": false,
+      "got": "inconclusive",
+      "expected": "cause_found"
+     },
+     "cause_category": {
+      "pass": true,
+      "expected": "recipient_opt_out",
+      "words_found": [
+       "recipient",
+       "opt",
+       "out"
+      ]
+     },
+     "must_mention": {
+      "pass": true,
+      "missing": []
+     },
+     "must_not_claim": {
+      "pass": true,
+      "claimed_in_verdict": []
+     },
+     "shortest_path": {
+      "pass": true,
+      "expected_tools": [
+       "fetch_delivery_logs"
+      ],
+      "not_called": [],
+      "tool_calls": 5,
+      "extra_steps": 4
+     },
+     "citations": {
+      "pass": true,
+      "cited": [
+       "E1",
+       "E2",
+       "E3",
+       "E4",
+       "E5"
+      ],
+      "unknown": []
+     },
+     "section5": {
+      "pass": true,
+      "present": true,
+      "says_none": false
+     }
+    },
+    "passed": 6,
+    "total": 7,
+    "all_passed": false
+   },
+   "report": "**1) Verdict:** Inconclusive, with moderate confidence that this is not a fault on our side. Failures rose sharply on 15–16 Nov, from about 2.4% to 14.8% and then 27.0% [E1]. They are spread evenly across every route, sender and template [E1]. Every reason in the logs is recipient-side or network-side. I could not see the reasons day by day, so I cannot say which one grew.\n\n**2) Evidence**\n- The failure rate was 1.4–2.7% on 9–14 Nov, then 14.8% on 15 Nov and 27.0% on 16 Nov (so far) [E1]. Volume looks normal: 638 requests on 14 Nov and 508 on 15 Nov. The 278 on 16 Nov covers only half a day [E1].\n- The jump is not tied to one route, sender or template. On 16 Nov both routes failed 27–28%, both senders 24–28% and all three templates 24–33%. The tool found no concentration [E1].\n- It is also not tied to a time of day. Most hours of 16 Nov are elevated, and the hours with enough volume to judge run from about 16% to 34% [E1].\n- The failure reasons across the whole window are all outside our sending code [E1]:\n  - \"Recipient opted out\" (161) means the recipient chose not to receive this kind of message. If it hits verification codes, the message category registered with the provider should be checked.\n  - \"Recipient unreachable\" (61) means the phone was off, out of coverage or full.\n  - \"Message expired\" (21) is a network category. It is usually a temporary operator problem, and persistent cases go to the provider.\n- The tool gave these reasons only as a total for the window. I cannot tell whether \"opted out\" or \"expired\" grew on 15–16 Nov.\n- The credit balance is 4,200, about 84,000 requests at the current rate [E3]. This is today's balance only.\n- All 4,888 recipients have 12-digit numbers, and no user has an empty dial code [E1][E2]. Counts are current, not historical, so hand edits could hide an earlier problem [E2].\n- Delivery delay is normal: median 6 s, p90 9 s [E1]. The queue is empty now, and every SMS row was sent within 30 s of creation [E4]. The queue check cannot tell code messages from other texts [E4].\n- Repeat requests are 1.5% of requests overall and 2.5% on 16 Nov [E1]. That is too small to explain the jump. A newer code replaces the older one, so a repeat can make a typed code \"invalid\". The logs cannot show which code a user typed [E1].\n- Recent commits are \"Add retry on provider timeout\", \"Log provider response status\", \"Tidy gateway logging\" and \"Update code expiry wording\" [E5]. Commit dates are masked, so I cannot tie any commit to 15 Nov. Only subjects and file names are visible.\n\n**3) Not checked / limits**\n- Ruled out: credit exhausted [E3]; template or registration failures [E1]; empty dial code [E1][E2]; late delivery and a stuck queue [E1][E4]; background noise as the whole story (the rate is far above the earlier 1.4–2.7%) [E1].\n- Open: a new or growing failure reason on 15–16 Nov. The log summary only gives window totals.\n- Open: the API failing or hanging. Failed rows reach the provider, so this is unlikely. I did not run the API test, and a credential problem would need that test.\n- Open: the code commits. Their dates are masked and the code itself is not read [E5].\n- Not available: check_numbers, because no phone numbers were given. The six days 3–8 Nov have no export, which means missing files, not zero traffic [E1]. They are not needed for this question.\n- Cannot be seen with these tools: scheduled database jobs.\n- The PM's report that \"some users never get codes\" is not backed by a specific user or number in what I received.\n\n**4) Suggested next steps**\n- Get the failure reasons split by day, so 14, 15 and 16 Nov can be compared.\n- If opt-outs jumped, ask the provider whether the message category or sender registration changed.\n- If \"expired\" or \"unreachable\" jumped, ask the provider about operator or network problems.\n- Ask engineering whether the retry and gateway commits were deployed on or around 15 Nov.\n- Re-check the log later today for the full 16 Nov rate.\n\n**5) Information needed from you**\n1. Delivery-log export (CSV, UTC, failed rows included) for 13–16 Nov. It gives a per-day reason breakdown and shows which reason grew. You can send the file, and I will read it with fetch_delivery_logs.\n2. Deploy dates for the code_service and message_gateway commits above. This tells us whether a release lines up with 15 Nov. Ask engineering or DevOps for a typed note.\n3. Whether the provider changed anything on 15 Nov, such as sender, category or operator issues. This would confirm or rule out a provider-side cause. Ask the provider's account contact and send a typed note.\n4. To run the API test (it sends one real message to your test number), approve it with: `python3 investigate.py --continue --approve-probe`. It would rule out an API or credential fault."
+  },
+  {
+   "scenario": "S17",
+   "from_run": "round-2",
+   "tools_called": [
+    "fetch_delivery_logs",
+    "check_user_data",
+    "get_credit_balance",
+    "recent_code_changes"
+   ],
+   "seconds": 19.6,
+   "model_calls": 3,
+   "input_tokens": 23331,
+   "output_tokens": 1769,
+   "expected_outcome": "cause_found",
+   "score": {
+    "checks": {
+     "outcome": {
+      "pass": true,
+      "got": "cause_found",
+      "expected": "cause_found"
+     },
+     "cause_category": {
+      "pass": true,
+      "expected": "bulk_import_missing_dial_code",
+      "words_found": [
+       "missing",
+       "dial",
+       "code"
+      ]
+     },
+     "must_mention": {
+      "pass": false,
+      "missing": [
+       "import",
+       "user data"
+      ]
+     },
+     "must_not_claim": {
+      "pass": true,
+      "claimed_in_verdict": []
+     },
+     "shortest_path": {
+      "pass": true,
+      "expected_tools": [
+       "fetch_delivery_logs",
+       "check_user_data"
+      ],
+      "not_called": [],
+      "tool_calls": 4,
+      "extra_steps": 2
+     },
+     "citations": {
+      "pass": true,
+      "cited": [
+       "E1",
+       "E2",
+       "E3",
+       "E4"
+      ],
+      "unknown": []
+     },
+     "section5": {
+      "pass": true,
+      "present": true,
+      "says_none": false
+     }
+    },
+    "passed": 6,
+    "total": 7,
+    "all_passed": false
+   },
+   "report": "1) **Verdict**\nMost likely cause: some new user records have an empty dial code (the country prefix), so their phone numbers are too short and the provider rejects them. Confidence: medium. The pattern fits, but the logs don't give me a per-day count of the rejected rows.\n\n2) **Evidence**\n- The failure rate was steady at about 1.4–2.3% a day from 9 to 14 Nov. It rose to 4.6% on 15 Nov and 18.2% on 16 Nov (264 requests so far today) [E1]. That is a sharp change, not normal background noise.\n- 67 failures are \"Invalid recipient format\". The meaning is that the number sent to the provider is not a full valid number, for example a missing country prefix [E1]. Exactly 67 recipients have 10-digit numbers, while the other 4,852 have the normal 12 digits [E1].\n- New users with an empty dial code appeared only on 15 Nov (3) and 16 Nov (6). Every earlier day shows 0 [E2]. This matches the rise in failures.\n- The failures are not tied to one route, sender or template. All of them are elevated today, and the tool reports no concentration [E1]. That fits a problem with specific users' numbers rather than a registration problem.\n- The other failure reasons look like normal recipient-side problems: unreachable phone (57), opted out (18) and message expired (11) [E1].\n- Delivery is fast for messages that were sent: median 6 s, slowest 9 s [E1].\n- The account has 4,200 credit [E3].\n\n3) **Not checked / limits**\n- Ruled out: credit exhaustion, since the balance is healthy now [E3] and volume has not collapsed [E1]. Template or registration failure [E1]. Slow delivery [E1].\n- The lack of a daily split of \"Invalid recipient format\" is why confidence is only medium. Today's 48 failures are not broken down by reason [E1].\n- Recent commits are about logging, retry and wording only. Nothing touches how numbers are built, but I read subject lines and file names, not the code [E4].\n- 3–8 Nov have no log data. That is a missing export, not zero traffic [E1]. Those days are also the days when the user table shows 0 new users [E2], so I can't say whether anything happened then.\n- User counts are current, not historical. Hand edits could have hidden earlier empty values [E2].\n- Not checked: whether the API fails or hangs, or whether its credential is stale. I did not run `check_code_api`, which sends one real message to your test number and needs your approval. Requests that failed before reaching the provider would leave no log rows. The dial-code problem could do this too.\n- Not checked: individual numbers and repeat requests per user. `check_numbers` is unavailable because no numbers were given. Repeat requests are low at 1.5% [E1].\n- Not checked: the message queue, the database scheduler and the code-validation logic. No tool here covers them.\n\n4) **Suggested next steps**\n- Ask engineering where the empty dial code comes from. Look at the signup or registration flow for 15–16 Nov.\n- Fix the affected records. Then have the affected users request a new code.\n- Add a check so that a user without a dial code is never sent a request.\n- Re-run the logs later today for the daily split of rejected numbers.\n\n5) **Information needed from you**\n1. Approval for the API test, to rule out the API itself - run: `python3 investigate.py --continue --approve-probe`\n2. A delivery-log export (CSV, UTC, failed rows included) for 3–8 Nov - fills the missing-data gap and gives a longer baseline - ask whoever holds the provider exports.\n3. A list of affected users' numbers - lets me match them to the empty-dial-code records and to the 10-digit failures - provide with `--prompt-numbers` or `--numbers-file`.\n4. Ask the engineering team what changed in signup or registration on 15 Nov, and whether any user records were edited by hand - this would confirm the cause."
+  },
+  {
+   "scenario": "S18",
+   "from_run": "round-2",
+   "tools_called": [
+    "fetch_delivery_logs",
+    "get_credit_balance",
+    "check_user_data",
+    "check_message_queue",
+    "recent_code_changes",
+    "check_code_api"
+   ],
+   "seconds": 50.3,
+   "model_calls": 3,
+   "input_tokens": 26405,
+   "output_tokens": 2340,
+   "expected_outcome": "cause_found",
+   "score": {
+    "checks": {
+     "outcome": {
+      "pass": true,
+      "got": "cause_found",
+      "expected": "cause_found"
+     },
+     "cause_category": {
+      "pass": true,
+      "expected": "api_hang_requests_lost",
+      "words_found": [
+       "api",
+       "hang",
+       "requests"
+      ]
+     },
+     "must_mention": {
+      "pass": true,
+      "missing": []
+     },
+     "must_not_claim": {
+      "pass": true,
+      "claimed_in_verdict": []
+     },
+     "shortest_path": {
+      "pass": true,
+      "expected_tools": [
+       "fetch_delivery_logs",
+       "check_code_api"
+      ],
+      "not_called": [],
+      "tool_calls": 6,
+      "extra_steps": 4
+     },
+     "citations": {
+      "pass": true,
+      "cited": [
+       "E1",
+       "E2",
+       "E3",
+       "E4",
+       "E5",
+       "E6"
+      ],
+      "unknown": []
+     },
+     "section5": {
+      "pass": true,
+      "present": true,
+      "says_none": false
+     }
+    },
+    "passed": 7,
+    "total": 7,
+    "all_passed": true
+   },
+   "report": "**1) Verdict:** The verification-code API is probably hanging, with moderate confidence. A test call just now got no answer within 30 seconds [E6]. That would explain a spinner and no code. The cause inside the API is not known.\n\n**2) Evidence**\n- The API check sent one test request. It got no answer in 30,038 ms [E6]. Requests that hang before they reach the provider leave no failed rows. This matches the known pattern \"API fails or hangs\".\n- Today's volume looks low. There are 121 SMS requests by about 12:00 UTC [E1]. Full days since 9 Nov ran 476 to 839, and 582 on Sunday [E1]. Hours 2 and 5 had no requests at all [E1]. Today's hourly counts are 2 to 26 [E1]. I have no earlier hourly baseline, so the drop is suggestive, not proven.\n- What reached the provider looks healthy. The failure rate is 1.7% today against 1.3–2.4% on earlier days [E1]. All failures are recipient-side: unreachable phone, opted out, or message expired [E1]. No single route, sender or template stands out today [E1].\n- Messages that reached the queue were handed to the provider within 30 seconds (all 4,978 SMS rows) [E4]. Median delivery delay is 6 s and the maximum is 9 s [E1]. The queue is empty now, and its newest row is recent [E4].\n- Credit is 4,200, about 84,000 requests at the current rate. This is the balance now, not at earlier times [E2].\n- Today's 23 new users have no empty dial code or locale [E3]. These counts are current, not historical, and later manual edits could hide an earlier problem.\n- Recent commits include \"Add retry on provider timeout\" in the gateway and \"Add resend limit\" in the code service [E5]. The commit dates are masked. Only subjects and file names are visible, so I cannot tie either commit to the hang.\n\n**3) Not checked / limits**\n- Ruled out, by the evidence above: normal background failures as the cause [E1], credit exhausted [E2], template or registration failure [E1], empty dial code today [E3], and a queue backlog or late delivery for rows that exist [E4][E1].\n- Missing logs: 3–8 Nov have no export, which is a missing file and not zero traffic [E1]. I cannot say whether this started before 9 Nov.\n- Open: the reason for the API hang. The API server's own log and its inner errors are not visible to any tool here.\n- Open: a stale or rejected API credential. The test shows only a timeout, not the reason.\n- Open: stopped scheduled database jobs. No tool here can see them.\n- Open: repeated requests. They are only 1.4% of requests and 0% today [E1]. They cannot explain a spinner, and the logs cannot show which code a user typed.\n- Not available: the per-number check, because you gave no phone numbers. To enable it, rerun with `--number`, `--numbers-file` or `--prompt-numbers`.\n- A code-level fault, where an older code still works after a newer one, is not assessed. The commits show nothing relevant by subject [E5].\n- The test message went to your test number. The provider log was not read after it, and no provider row was confirmed.\n\n**4) Suggested next steps**\n- Ask engineering or DevOps now to check the API server's log and inner errors for timeouts since about 00:00 UTC today. Also ask what it is waiting on (database, gateway or provider call).\n- Ask them to check whether the new \"retry on provider timeout\" change [E5] could make requests wait. This is a lead only.\n- Re-run the API check in a few minutes to see if the hang persists. A stuck call may also be what the live provider log is lagging on.\n- Ask them to set a short client timeout so users see an error instead of an endless spinner.\n\n**5) Information needed from you**\n1. When the first user reports came in, and whether they are still coming (typed note). This sets the start of the hang and tells us whether it is ongoing.\n2. Hourly request counts for a normal Monday, or a 3–8 Nov delivery-log export (CSV, UTC, failed rows included). This would confirm the volume drop and show whether it began before 9 Nov. Ask whoever exports the provider logs.\n3. Engineering: the API server log for today (since 00:00 UTC), with any timeout or exception entries. Ask them to confirm when each of the two commits was deployed [E5].\n4. A few test phone numbers (`--number`, `--numbers-file` or `--prompt-numbers`). This enables the per-number check for affected users."
+  },
+  {
+   "scenario": "S19",
+   "from_run": "round-2",
+   "tools_called": [
+    "fetch_delivery_logs",
+    "check_message_queue",
+    "get_credit_balance",
+    "recent_code_changes"
+   ],
+   "seconds": 20.7,
+   "model_calls": 2,
+   "input_tokens": 14499,
+   "output_tokens": 2015,
+   "expected_outcome": "cause_found",
+   "score": {
+    "checks": {
+     "outcome": {
+      "pass": false,
+      "got": "no_issue",
+      "expected": "cause_found"
+     },
+     "cause_category": {
+      "pass": true,
+      "expected": "delivery_delay",
+      "words_found": [
+       "delivery"
+      ]
+     },
+     "must_mention": {
+      "pass": false,
+      "missing": [
+       "delivered"
+      ]
+     },
+     "must_not_claim": {
+      "pass": true,
+      "claimed_in_verdict": []
+     },
+     "shortest_path": {
+      "pass": true,
+      "expected_tools": [
+       "fetch_delivery_logs"
+      ],
+      "not_called": [],
+      "tool_calls": 4,
+      "extra_steps": 3
+     },
+     "citations": {
+      "pass": true,
+      "cited": [
+       "E1",
+       "E2",
+       "E3",
+       "E4"
+      ],
+      "unknown": []
+     },
+     "section5": {
+      "pass": true,
+      "present": true,
+      "says_none": false
+     }
+    },
+    "passed": 5,
+    "total": 7,
+    "all_passed": false
+   },
+   "report": "1) **Verdict:** I found no sign that messages are failing or arriving late, in the provider logs or in the outgoing queue. The cause of the late codes is not found. Confidence is moderate for 9–16 Nov and none for 3–8 Nov, because there is no data for those days.\n\n2) **Evidence**\n- Of 5,143 messages from 9 to 16 Nov, 98 failed (1.9%). Daily failure rates were 1.0–2.6%, with no sharp change on the latest day [E1].\n- Delivery time at the provider is normal: median 6 s, 90th percentile 9 s. The slowest message took 223 s, about 3.7 minutes, which is still inside the 10-minute code life [E1].\n- All failures fall into three reasons already in the glossary [E1]:\n  - Recipient unreachable: 59. The phone was off, out of coverage or full. Nothing to fix on our side.\n  - Recipient opted out: 24. This is the recipient's own preference.\n  - Message expired: 15, category Network. It is usually a temporary operator or network problem, and persistent cases go to the provider.\n- Failures are not concentrated on one route, sender, template or hour on 16 Nov (the tool reports no concentration) [E1].\n- The outgoing queue is empty now. Every text and push row was handed to the provider within 30 s, and none waited longer [E2]. The queue check cannot tell code messages from other texts, and SENT means handed to the provider, not received [E2].\n- Daily volume is steady: 536–825 per day on 9–15 Nov, and 274 so far on 16 Nov, a partial day [E1]. All recipient numbers have the full 12 digits [E1].\n- Credit is healthy: balance 4,200 now [E3]. That says nothing about earlier days.\n- Repeat requests are about 1.3% of requests [E1]. A newer code replaces an older one, so a repeat is one way a user can be told a code is invalid. This share is small and did not rise [E1].\n- Recent code changes are a resend limit, retry on provider timeout, logging changes and expiry wording. Their subjects don't show a cause, and I only see subjects and file names, so I can't rule them out [E4].\n\n3) **Not checked / limits**\n- **Ruled out for 9–16 Nov:** normal background failures as the whole story, credit exhaustion, template or registration failures, delivery lateness at the provider, and a queue backlog [E1][E2][E3].\n- **No data for 3–8 Nov:** these are missing export files, not zero traffic [E1]. If the problem started before 9 Nov, I can't see it.\n- **API fault before the provider:** not tested. Volume looks normal, but the API check sends one real message and needs your approval.\n- **Expired-message rows:** 15 failures were \"Message expired\", but I can't tell which days or users they belong to [E1].\n- **Empty dial codes, stale credentials, stopped database jobs, and an old code still working after a new one is issued:** not checked. The user-data check was not run, and the code-level and scheduler causes are invisible to these tools.\n- **Phone numbers:** the number check is unavailable because no phone numbers were given.\n- **Handset and operator lateness:** the provider log can't show delays after hand-off.\n\n4) **Suggested next steps**\n- Get the exact times a few affected users requested and received a code, then compare them with the provider log. This shows whether the delay is before the provider, at the provider, or on the phone.\n- Ask the provider about the 15 \"Message expired\" rows and any operator delays.\n- Run the API check to time a live request and see whether the API itself is slow.\n- Ask engineering whether the resend limit or retry-on-timeout changes could delay or duplicate requests. They can also check the API server's own log.\n\n5) **Information needed from you**\n1. Approve the API test, which sends one real message to your test number. It shows how long the API takes to answer and whether the request reaches the provider. Run: `python3 investigate.py --continue --approve-probe`\n2. Dates and times (UTC) of 3–5 complaints, with request time and receipt time if known. This pins down where the delay happens. Give it as a typed note from support.\n3. Delivery-log CSV export for 3–8 Nov, with failed rows included. It shows whether the problem began before 9 Nov. Ask whoever holds the provider exports.\n4. Phone numbers of affected users, only if you can provide them. They enable the number check, which would show repeat requests and number format per user. Run with `--number`, `--numbers-file` or `--prompt-numbers`."
+  },
+  {
+   "scenario": "S1a",
+   "from_run": "round-1",
+   "tools_called": [
+    "fetch_delivery_logs",
+    "get_credit_balance",
+    "check_user_data",
+    "check_message_queue",
+    "recent_code_changes"
+   ],
+   "seconds": 20.3,
+   "model_calls": 2,
+   "input_tokens": 15618,
+   "output_tokens": 2411,
+   "expected_outcome": "cause_found",
+   "score": {
+    "checks": {
+     "outcome": {
+      "pass": true,
+      "got": "cause_found",
+      "expected": "cause_found"
+     },
+     "cause_category": {
+      "pass": true,
+      "expected": "release_change_recipient_format",
+      "words_found": [
+       "recipient",
+       "format"
+      ]
+     },
+     "must_mention": {
+      "pass": false,
+      "missing": [
+       "code_service"
+      ]
+     },
+     "must_not_claim": {
+      "pass": true,
+      "claimed_in_verdict": []
+     },
+     "shortest_path": {
+      "pass": false,
+      "expected_tools": [
+       "fetch_delivery_logs",
+       "check_code_api",
+       "recent_code_changes"
+      ],
+      "not_called": [
+       "check_code_api"
+      ],
+      "tool_calls": 5,
+      "extra_steps": 2
+     },
+     "citations": {
+      "pass": true,
+      "cited": [
+       "E1",
+       "E2",
+       "E3",
+       "E4",
+       "E5"
+      ],
+      "unknown": []
+     },
+     "section5": {
+      "pass": true,
+      "present": true,
+      "says_none": false
+     }
+    },
+    "passed": 5,
+    "total": 7,
+    "all_passed": false
+   },
+   "report": "**1) Verdict:** Yes, there is an incident. Since 2026-11-15 most codes fail because the phone number sent to the provider is too short (10 digits instead of 12). Confidence: medium-high. The cause of the short numbers is not yet confirmed.\n\n**2) Evidence**\n- Failures were about 0.5–1.9% a day from 11-09 to 11-14. They rose to 26.6% on 11-15 and 100% on 11-16 (289 of 289 requests so far) [E1].\n- The main failure reason is \"Invalid recipient format\", with 426 of 496 failures. The provider says the number is not a valid full number, for example a missing country prefix. The category is Recipient number. The glossary says that if many numbers are malformed, we should check how our system builds the number [E1].\n- Exactly 426 recipients have 10-digit numbers, against 12 digits for all the others [E1]. The spike days add up to about 432 failures (26.6% of 537 on 11-15, plus 289 on 11-16). That is close to 426, so the short numbers very likely explain the spike. The logs give no per-day split by reason, so this is an inference [E1].\n- On 11-16 every route, sender and template fails at 100%, and every hour from 00:00 to 11:00 fails. No single template or sender is to blame, which does not fit a registration problem [E1].\n- Other failure reasons are small and look like normal recipient-side noise. 48 were \"Recipient unreachable\", 14 \"Message expired\" and 8 \"Recipient opted out\" [E1].\n- Credit is healthy now at 4200 [E2]. This does not show the balance at earlier times, but the failed rows exist in the logs and credit exhaustion leaves no rows.\n- The queue sent everything in under 30 seconds, with nothing waiting and recent rows present. Delivery delay is median 5 s and maximum 9 s, so this is not a lateness problem [E4][E1]. The queue check cannot tell code rows from other text messages [E4].\n- A recent code commit is titled \"Normalise phone numbers before sending\" (src/codes/send_code.py). It is a lead only. The tool returned the commit dates masked, so I cannot tie it to 11-15, and I have not read the code [E5].\n- Repeat requests are low at 1.2% overall and 2.1% on 11-16. That does not explain \"no code\" [E1].\n\n**3) Not checked / limits**\n- Ruled out: credit exhaustion [E2], a template or registration fault [E1], codes arriving late [E1][E4], and a stuck queue [E4]. Normal background noise alone is also ruled out [E1].\n- Empty dial code in user records: current data shows zero empty dial codes on every day [E3]. These counts are current, not historical, and hand edits could hide an earlier problem. Whether the short numbers come from user records or from the code is still open.\n- check_numbers was not available because no phone numbers were provided. I could not look at individual affected users.\n- Logs for 11-03 to 11-08 are missing, which means a missing export, not zero traffic [E1]. The baseline therefore covers 11-09 to 11-14 only.\n- I did not run the API test. Requests are reaching the provider and failing, so it is not the first step.\n- Not visible to any tool here: the API server's own log, and what the number-building code does.\n- Scheduled database jobs: no tool can see them. Nothing in the queue or user data suggests a stopped job [E3][E4].\n\n**4) Suggested next steps**\n- Ask engineering to review commit ddf12a8, \"Normalise phone numbers before sending\", and the code that builds the full number. They should check whether the country prefix is dropped, and whether the change was deployed around 11-14 to 11-15.\n- If that is the cause, roll back or fix the change, then watch the failure rate and the 10-digit share.\n- Ask the DBA whether any bulk edit or import touched dial codes or phone fields around 11-14 to 11-15.\n- Tell the affected users that retries will not help until the fix is deployed.\n\n**5) Information needed from you**\n1. Deployment time of commit ddf12a8, and the code that builds the full number: ask engineering or DevOps. This confirms or rules out the cause.\n2. Any bulk edit, import or migration on user phone or dial-code fields from 11-13 to 11-16: ask the DBA. This would show whether the data was changed.\n3. The phone numbers of a few affected users, as a typed note or file via `--number`, `--numbers-file` or `--prompt-numbers`. This lets me check individual request histories. Aliases are fine, and I never see the numbers.\n4. A delivery-log export for 11-03 to 11-08 (CSV, UTC, failed rows included): ask whoever holds the exports. This would fill the baseline gap."
+  },
+  {
+   "scenario": "S1b",
+   "from_run": "round-1",
+   "tools_called": [
+    "fetch_delivery_logs",
+    "get_credit_balance",
+    "check_user_data",
+    "check_message_queue",
+    "recent_code_changes",
+    "check_code_api"
+   ],
+   "seconds": 26.1,
+   "model_calls": 3,
+   "input_tokens": 27076,
+   "output_tokens": 2844,
+   "expected_outcome": "cause_found",
+   "score": {
+    "checks": {
+     "outcome": {
+      "pass": true,
+      "got": "cause_found",
+      "expected": "cause_found"
+     },
+     "cause_category": {
+      "pass": true,
+      "expected": "release_change_recipient_format",
+      "words_found": [
+       "change",
+       "recipient",
+       "format"
+      ]
+     },
+     "must_mention": {
+      "pass": false,
+      "missing": [
+       "code_service"
+      ]
+     },
+     "must_not_claim": {
+      "pass": true,
+      "claimed_in_verdict": []
+     },
+     "shortest_path": {
+      "pass": true,
+      "expected_tools": [
+       "fetch_delivery_logs",
+       "recent_code_changes"
+      ],
+      "not_called": [],
+      "tool_calls": 6,
+      "extra_steps": 4
+     },
+     "citations": {
+      "pass": true,
+      "cited": [
+       "E1",
+       "E2",
+       "E3",
+       "E4",
+       "E5",
+       "E6"
+      ],
+      "unknown": []
+     },
+     "section5": {
+      "pass": true,
+      "present": true,
+      "says_none": false
+     }
+    },
+    "passed": 6,
+    "total": 7,
+    "all_passed": false
+   },
+   "report": "1) **Verdict:** Yes, there is an issue, and it is probably a new one. Text-message (SMS) code requests appear to have stopped reaching the provider from the evening of 15 Nov. The provider refuses them as \"invalid recipient format\". Confidence is medium-high that this is happening, and low on the root cause.\n\n2) **Evidence**\n- **Refused requests:** The provider's failed-call log shows 425 requests refused before submission with error E105, \"Invalid recipient format\". The number sent was not a valid full number. There were 131 on 15 Nov and 294 on 16 Nov. No other error code appears [E1]. These requests leave no row in the delivery logs, so they are not counted as failures there [E1].\n- **SMS volume stops:** SMS volume was steady at about 30–38 requests an hour through 17:00 UTC on 15 Nov. There are no SMS rows after that hour [E1]. The queue shows no SMS rows at all for 16 Nov, while push notifications continue (49 rows) [E4]. So the queue worker is running, and the gap is upstream of it [E4].\n- **Daily volume:** SMS requests were 466–826 a day on 9–14 Nov. On 15 Nov there were 381 [E1]. That day is partly a normal weekend dip, but it is also cut short.\n- **Delivery of what got through is normal:** The failure rate is 1.9% overall, with no new failure category. The failures are recipient-side: unreachable, opted out, or expired [E1]. No route, sender or template stands out [E1]. All delivered recipients have 12-digit numbers [E1]. Median delay is 5 seconds and the maximum is 9 seconds [E1]. All SMS rows were sent in under 30 seconds [E4].\n- **Test request:** The API call with the PM's test number succeeded in 117 ms and the provider showed it delivered [E6]. A correctly formatted number works, so the fault is likely tied to how some numbers are built. This is not proof of the cause.\n- **Code change lead (unverified):** A commit titled \"Normalise phone numbers before sending\" touched `src/codes/send_code.py` [E5]. The tool masks commit dates, so I cannot tell whether it went live around 15 Nov 17:00. It fits the symptom but is only a lead.\n\n3) **Not checked / limits**\n- **Ruled out:**\n  - Credit: the balance is healthy now [E2]. I cannot check the balance at the time of the incident.\n  - Template or registration failures: no Registration-category failures [E1].\n  - Normal recipient-side noise: it is at its usual level and does not explain the problem [E1].\n  - Late delivery or a stuck queue: nothing is waiting and all waits are under 30 seconds [E4].\n  - API down: the test call is healthy [E6].\n  - Empty dial code: none in current user data [E3]. These counts are current, not historical, so hand edits could hide earlier problems.\n- **Open:**\n  - Missing data: 3–8 Nov have no export, which is a missing file and not zero traffic [E1]. I have no baseline for E105 before 15 Nov, because the failed-call log lists only 15–16 Nov.\n  - Exact start time and cause of E105: I could not determine them. Only engineering can see the API server log and the code that builds the number.\n  - Stale or rejected credential: no sign of it, and the test call worked [E6]. I did not test it directly.\n  - Repeated requests replacing codes: repeats are only 1.5% of requests [E1]. I could not look at specific users because I have no phone numbers.\n  - Scheduled database jobs: no tool can see them.\n  - Older code still working after a newer one: I could not check this beyond the commit list [E5].\n\n4) **Suggested next steps**\n- Ask engineering to compare the E105 refusals with the \"Normalise phone numbers before sending\" change. If it is the cause, roll it back or fix it.\n- Re-check later: SMS volume should recover and E105 counts should stop growing.\n- Once fixed, tell the affected users to retry. Codes expire after about 10 minutes.\n\n5) **Information needed from you**\n1. The time the \"Normalise phone numbers before sending\" change was deployed. It would confirm or rule out the link to the 15 Nov ~18:00 drop. Ask engineering or DevOps.\n2. A sample of the number format (length and prefix pattern only, with no actual numbers) in the E105 calls, plus the API server log for 15–16 Nov. It would show what is wrong with the number. Ask engineering.\n3. A delivery-log export (CSV, UTC) for 3–8 Nov. It would show the baseline and whether E105 refusals happened earlier. Ask whoever holds the exports.\n4. Phone numbers of 2–3 affected users, passed with `--number` or `--numbers-file`. This would let me check their individual requests and whether the dial code is complete. Ask support for them."
+  },
+  {
+   "scenario": "S20",
+   "from_run": "round-2",
+   "tools_called": [
+    "fetch_delivery_logs",
+    "get_credit_balance",
+    "check_user_data",
+    "check_message_queue",
+    "recent_code_changes",
+    "check_code_api"
+   ],
+   "seconds": 21.4,
+   "model_calls": 3,
+   "input_tokens": 26161,
+   "output_tokens": 2544,
+   "expected_outcome": "cause_found",
+   "score": {
+    "checks": {
+     "outcome": {
+      "pass": true,
+      "got": "cause_found",
+      "expected": "cause_found"
+     },
+     "cause_category": {
+      "pass": true,
+      "expected": "api_save_error_requests_lost",
+      "words_found": [
+       "api",
+       "error",
+       "requests"
+      ]
+     },
+     "must_mention": {
+      "pass": true,
+      "missing": []
+     },
+     "must_not_claim": {
+      "pass": true,
+      "claimed_in_verdict": []
+     },
+     "shortest_path": {
+      "pass": true,
+      "expected_tools": [
+       "fetch_delivery_logs",
+       "check_code_api"
+      ],
+      "not_called": [],
+      "tool_calls": 6,
+      "extra_steps": 4
+     },
+     "citations": {
+      "pass": true,
+      "cited": [
+       "E1",
+       "E2",
+       "E3",
+       "E4",
+       "E5",
+       "E6"
+      ],
+      "unknown": []
+     },
+     "section5": {
+      "pass": true,
+      "present": true,
+      "says_none": false
+     }
+    },
+    "passed": 7,
+    "total": 7,
+    "all_passed": true
+   },
+   "report": "1) **Verdict:** The verification-code API is failing right now, so requests can fail before they reach the provider. That fits \"error or spinner, nothing arrives, no failed rows\". Confidence: medium-high that the API fault is real today. Low on when it started and how many users it hit. The cause is unknown.\n\n2) **Evidence**\n- My one test call to the API returned a server error (HTTP 500) after 193 ms, with the message \"The server could not store the request\". The tool says users hitting this would get no code and nothing would reach the provider. The cause is only in the API server's own log [E6]. I am not naming a cause from the message wording.\n- Delivery logs show 107 failures out of 4,772 rows (2.2%). All are ordinary recipient-side reasons: phone unreachable (70), opted out (24), message expired (13). There is no new category and no concentration on one route, sender or template [E1]. Failures can only appear for requests that reached the provider, so they cannot show this fault.\n- Volume by day: 456 on Nov 9, then 737–805 on Nov 10–13, 602 on Nov 14 and 508 on Nov 15. Today has 108 requests as of 12:02 [E1]. Today's hourly volume is 4–20 requests an hour [E1]. I have no earlier baseline, so I cannot say today is a clear drop.\n- New requests were still being recorded as recently as 11:57 today [E4]. The fault may therefore be partial or intermittent, or it may have just started. This is an inference, not a proven fact.\n- Rows that did get through were handed to the provider quickly. All 4,772 SMS rows waited under 30 seconds, and the median delivery delay was 6 seconds with a maximum of 9 [E4][E1]. Nothing is waiting in the queue now [E4]. The queue check cannot tell code messages from other texts [E4].\n\n3) **Not checked / limits**\n- **Ruled out, with caveats:** credit exhaustion (balance 4,200 now [E2], but this does not show the balance at earlier times); registration or template failure (none in the failure reasons [E1]); empty dial code (0 empty on every day [E3]; this is current data, and hand edits could hide earlier problems); late delivery or queue backlog [E4][E1]; background noise is the only failure pattern [E1].\n- **Stale credential:** the API check returned a server error, not an auth rejection [E6]. This is not the pattern.\n- **Missing data:** Nov 3–8 have no log export. That is a missing file, not zero traffic [E1]. Those days are therefore unusable as a baseline.\n- **Still open, no tool can see it:**\n  - The API server's own log and inner exceptions.\n  - Whether the database scheduled jobs or storage are healthy.\n  - The start time of the fault.\n  - Repeated requests replacing earlier codes: only 1.6% of requests, which is minor [E1].\n  - Older code still working after a newer one was issued (code-level fault): the commit subjects show nothing obviously related, but code is not read [E5].\n- The commit dates are masked in the tool output, so I cannot say which changes are recent [E5]. The \"Add resend limit\" and \"Add retry on provider timeout\" commits could be worth a look, but nothing links them to this fault.\n\n4) **Suggested next steps**\n- Ask engineering to read the API server log for the 500 errors on the send-code endpoint. The test call above was made at 12:02:39 UTC. Find when the errors started and how often they occur.\n- Ask the DBA or DevOps whether the database that stores code requests is writable and has free space, and whether any scheduled jobs stopped. The error message mentions storing the request, but that is only a lead to check, not a conclusion.\n- Check whether any deployment or config change went out just before the errors started, including the gateway or resend-limit commits [E5].\n- Re-run the API check after a fix. A single healthy result would not prove the earlier incident did not happen.\n\n5) **Information needed from you**\n1. Recent API server log extract (error lines for the send-code endpoint, last 7 days, UTC) - confirms the cause of the 500 and when it started - ask engineering or DevOps for a typed note or text file.\n2. Database health and scheduled-job history (same period) - shows whether storage or a stopped job explains \"could not store the request\" - ask the DBA for a typed note.\n3. Delivery-log exports for 2026-11-03 to 2026-11-08, including failed rows - gives a baseline to judge today's volume - upload a CSV from the provider export.\n4. Time of the first user complaint and roughly how many users reported it - dates the start of the fault against the volume - typed note."
+  },
+  {
+   "scenario": "S21",
+   "from_run": "round-2",
+   "tools_called": [
+    "fetch_delivery_logs",
+    "recent_code_changes",
+    "check_message_queue",
+    "recent_code_changes",
+    "check_user_data"
+   ],
+   "seconds": 17.7,
+   "model_calls": 3,
+   "input_tokens": 24057,
+   "output_tokens": 2007,
+   "expected_outcome": "cause_found",
+   "score": {
+    "checks": {
+     "outcome": {
+      "pass": false,
+      "got": "no_issue",
+      "expected": "cause_found"
+     },
+     "cause_category": {
+      "pass": true,
+      "expected": "repeat_requests_replace_codes",
+      "words_found": [
+       "repeat",
+       "requests",
+       "replace",
+       "codes"
+      ]
+     },
+     "must_mention": {
+      "pass": true,
+      "missing": []
+     },
+     "must_not_claim": {
+      "pass": true,
+      "claimed_in_verdict": []
+     },
+     "shortest_path": {
+      "pass": true,
+      "expected_tools": [
+       "fetch_delivery_logs"
+      ],
+      "not_called": [],
+      "tool_calls": 5,
+      "extra_steps": 4
+     },
+     "citations": {
+      "pass": true,
+      "cited": [
+       "E1",
+       "E3",
+       "E4",
+       "E5"
+      ],
+      "unknown": []
+     },
+     "section5": {
+      "pass": true,
+      "present": true,
+      "says_none": false
+     }
+    },
+    "passed": 6,
+    "total": 7,
+    "all_passed": false
+   },
+   "report": "1) **Verdict:** The messages are probably not failing. Delivery looks normal, but repeat requests jumped on 2026-11-16. That makes \"a newer code replaced the one the user typed\" the leading lead. Confidence is moderate, because the logs can't show which code a user typed.\n\n2) **Evidence**\n- Failures are low and steady at 1.9% overall (93 of 4,955). Daily rates are 1.2–2.4%, and today is 2.4%. Every failure is a recipient-side reason: phone unreachable (54), opted out (27) or message expired (12). No new failure category and no single route, sender or template carries the failures [E1].\n- Delivery is fast, with a median of 6 s and a worst case of 9 s [E1]. Every queued text was handed to the provider in under 30 s, nothing is waiting now, and the newest queue row is recent [E3]. The queue can't tell code messages from other texts, and \"SENT\" means handed to the provider, not received [E3].\n- Repeat requests are the anomaly. A repeat means the same number asked again within the 10-minute code validity window. Today 24.3% of requests are repeats, against 0.7–2.4% on 2026-11-09 to 2026-11-15 [E1]. A newer code replaces the older one, so a user who types the first code is told it is invalid even though both messages arrived [E1].\n- Request volume is not low. Today has 375 requests by 12:04 UTC, which is in line with the other days [E1].\n- No user record has an empty dial code or locale, and all recipient numbers are 12 digits [E5][E1]. Past days could have been edited by hand later, so these counts are current, not historical [E5].\n- Recent commits are \"Add retry on provider timeout\" in the gateway, \"Update code expiry wording\", and two logging changes [E4]. Commit dates are masked and the code was not read, so I can't link any of them to the repeat spike [E4].\n\n3) **Not checked / limits**\n- Ruled out, with evidence: normal background failures as the cause [E1], credit exhaustion (volume is normal and there are no new failures) [E1], template or registration failures [E1], empty dial code [E5][E1], late delivery [E1][E3], and a stalled queue [E3].\n- The credit balance was not read. The volume and failure evidence already argues against credit exhaustion [E1].\n- 2026-11-03 to 2026-11-08 have no data. That is a missing export, not zero traffic [E1].\n- Per-number checks were not available, because you gave no phone numbers. I can't tell whether the repeats come from many users or a few.\n- Open: the repeat spike could come from the app (a resend button or double submit), from the new retry code, or from users re-requesting. The logs can't separate these.\n- Open: whether an older code still works after a newer one is issued, and the code that validates a code. No tool here can see either; engineering would have to check.\n- Open: the API server's own log and the database scheduler's job history. No tool here can see them.\n- Not run: the API check. It sends one real message to your test number and needs your approval.\n\n4) **Suggested next steps**\n- Ask engineering whether the retry-on-timeout change (or any app change) is sending duplicate code requests. Ask what time today the repeats began.\n- Ask engineering to confirm in the validation code that only the newest code is accepted, and to check the server log for \"invalid code\" errors against request times.\n- Run the API check to confirm the endpoint responds normally, and re-check the provider log a few minutes later, since that log lags.\n\n5) **Information needed from you**\n1. Approval for the API test: run `python3 investigate.py --continue --approve-probe`. It checks that the API responds normally and sends one message to your test number.\n2. The time of the first complaint and a few example affected users (as typed notes, with no phone numbers) – this lines the complaints up with the repeat spike. Ask support.\n3. Engineering: the API server log for today's repeat requests (request times and any retries or errors), plus the deploy time of the gateway retry change. Ask them to send it as a text file or typed note.\n4. Optional: a delivery-log export for 2026-11-03 to 2026-11-08 (CSV, UTC, failed rows included) – this would extend the baseline for repeat requests."
+  },
+  {
+   "scenario": "S22",
+   "from_run": "round-2",
+   "tools_called": [
+    "fetch_delivery_logs",
+    "check_message_queue",
+    "check_user_data",
+    "get_credit_balance",
+    "recent_code_changes"
+   ],
+   "seconds": 19.8,
+   "model_calls": 2,
+   "input_tokens": 14950,
+   "output_tokens": 2390,
+   "expected_outcome": "inconclusive",
+   "score": {
+    "checks": {
+     "outcome": {
+      "pass": false,
+      "got": "cause_found",
+      "expected": "inconclusive"
+     },
+     "cause_category": {
+      "pass": true,
+      "expected": "scheduled_jobs_not_visible",
+      "words_found": [
+       "scheduled",
+       "jobs",
+       "visible"
+      ]
+     },
+     "must_mention": {
+      "pass": true,
+      "missing": []
+     },
+     "must_not_claim": {
+      "pass": true,
+      "claimed_in_verdict": []
+     },
+     "shortest_path": {
+      "pass": true,
+      "expected_tools": [
+       "fetch_delivery_logs",
+       "check_message_queue"
+      ],
+      "not_called": [],
+      "tool_calls": 5,
+      "extra_steps": 3
+     },
+     "citations": {
+      "pass": true,
+      "cited": [
+       "E1",
+       "E2",
+       "E3",
+       "E4",
+       "E5"
+      ],
+      "unknown": []
+     },
+     "section5": {
+      "pass": true,
+      "present": true,
+      "says_none": false
+     }
+    },
+    "passed": 6,
+    "total": 7,
+    "all_passed": false
+   },
+   "report": "**1) Verdict:** Probable cause: 33 text-message rows have been stuck in \"SENDING\" since about 01:05 UTC today, so they never reached the provider. That is why the delivery logs show no failures. Confidence is medium. The queue evidence is clear, but the reason they are stuck is not visible to any tool I have.\n\n**2) Evidence**\n- The provider log shows 5,017 requests from 9–16 Nov, with a 2.0% failure rate. Every failure is recipient-side: unreachable phone 65, opted out 26, message expired 10. Today's rate is 2.5%, in line with earlier days (1.3–2.6%). No route, sender or template stands out, and delivery takes a median of 6 s and at most 9 s [E1].\n- The message queue holds 33 SMS rows in \"SENDING\" that are older than 10 minutes. The oldest is 657 minutes old, created about 01:05 UTC. A row normally stays in that state for seconds [E2].\n- Today the queue holds 238 sent SMS plus 33 stuck, and the provider log shows 238 requests. So the stuck rows are missing from the provider log, which would explain \"no failures\" [E1][E2]. This is about 12% of today's SMS (33 of 271) and fits \"a small share\".\n- Every row that was sent went out in under 30 seconds, and the newest queue row is recent (11:57). The sender is working; only these rows are stuck [E2].\n- Earlier days show no stuck or unusual rows, so this is new [E2].\n- Codes expire after about 10 minutes, so these 33 are useless even if they are sent later [E2].\n- Credit is 4,200, enough for about 84,000 requests [E4].\n- Empty dial codes and locales are 0 for every day [E3]. This is current data only, so it cannot rule out earlier hand-edited problems.\n- Repeat requests are 1.5% of requests and steady each day, so they are not a new factor [E1].\n- This matches the known pattern \"scheduled database jobs stopped\", but I cannot confirm it. No tool here can see the scheduler or its job history.\n\n**3) Not checked / limits**\n- Ruled out: recipient-side background noise [E1]; credit exhausted [E4]; template or registration failures [E1]; empty dial codes (current data only) [E3]; a missing export, since no dates lack data [E1]; late delivery of rows that were sent [E1][E2]; a rise in repeat requests [E1].\n- Still open: why the rows are stuck (stopped scheduler, worker crash or restart, or something else). Only the DBA or DevOps can see this.\n- Open: the queue count cannot separate verification codes from other texts [E2]. Some of the 33 may not be codes.\n- Open: the API itself was not tested. It needs your approval to send one real message to your test number.\n- Open: recent code changes. Commit dates are masked, and I cannot tell whether \"Add retry on provider timeout\" or the logging changes matter [E5]. I have not judged them to be the cause.\n- Not available: check_numbers, because no phone numbers were supplied, so no per-user view of affected users.\n- Not checked: a code-level fault where an older code still works after a newer one was issued. The commits show no change to code validation, but code is not read [E5].\n\n**4) Suggested next steps**\n- Ask the DBA or DevOps whether the database scheduler is running, since when, and when each reset or retry job last ran.\n- Ask engineering why the worker left rows in \"SENDING\" at about 01:05 UTC. Ask whether a restart or crash happened then, and what the gateway log shows.\n- Ask the DBA to reset the stuck rows, but only after checking whether they are codes. Old codes have already expired, so users should simply request a new one.\n- Re-run the queue check in 15–30 minutes. If the stuck count grows past 33, the fault is ongoing.\n\n**5) Information needed from you**\n1. Approval of one API test (sends one real message to your test number) - this shows whether the API accepts the request and the provider log then shows it, which checks for a fault before the provider - run: `python3 investigate.py --continue --approve-probe`\n2. The database administrator's answer on the scheduler: is it running, since when, and when did each job last run - this confirms or rules out the stopped-jobs cause - ask the DBA by typed note.\n3. Engineering or DevOps: server and worker restart or crash times and error log around 00:30–01:30 UTC today, and whether the 33 stuck rows are verification codes - this confirms the cause and the impact - ask engineering, reply by typed note or text file.\n4. A few affected users' phone numbers, as `--numbers-file` or `--prompt-numbers` - this would show whether their requests are among the stuck rows - provide when running the tool."
+  }
+ ]
+}

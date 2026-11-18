@@ -1,0 +1,51 @@
+{
+  "id": "S5",
+  "title": "Two faults: template rejection and slow API",
+  "question": "Verification codes are failing and slow today. What is going on?",
+  "generate": {
+    "faults": [
+      {
+        "type": "template_reject",
+        "template": "T_RESET",
+        "start": "2026-11-16T00:00",
+        "fail_share": 1.0,
+        "reason": "Template not registered (mock wording)"
+      }
+    ],
+    "api": {
+      "latency_ms": 1800,
+      "forward": "keep",
+      "echo_forwarded_number": false
+    },
+    "repos": {
+      "code_service": "clean",
+      "message_gateway": "clean"
+    },
+    "outputs": {
+      "api_failed_log": false,
+      "api_failed_log_benign_records": 0,
+      "export_damage_share": 0.0,
+      "primary_store": "webhook_store"
+    }
+  },
+  "expected": {
+    "outcome": "cause_found",
+    "cause_category": "two_faults",
+    "layer": "provider_template+api",
+    "culprit_repo": null,
+    "must_mention": [
+      "Template not registered (mock wording)",
+      "T_RESET"
+    ],
+    "must_not_claim": [
+      "credit",
+      "provider outage"
+    ],
+    "accepts": "Pass if both faults are named, or if one is named and the other is flagged as unresolved or not fully checked.",
+    "shortest_path": [
+      "fetch_logs:delivery_reports",
+      "call_api"
+    ],
+    "notes": "Faults: template T_RESET rejected from 2026-11-16 00:00, and the API probe latency is 1800 ms."
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "id": "S18",
+  "title": "Verification API hangs about 100 seconds for some requests; those requests are lost before the provider",
+  "question": "Some users say they tapped Send verification code, the app just kept spinning, and nothing arrived. Is something wrong?",
+  "generate": {
+    "faults": [
+      {
+        "type": "upstream_hang_drop",
+        "start": "2026-11-16T06:00",
+        "share": 0.6
+      }
+    ],
+    "api": {
+      "latency_ms": 100000,
+      "forward": "keep",
+      "echo_forwarded_number": false
+    },
+    "repos": {
+      "code_service": "clean",
+      "message_gateway": "clean"
+    },
+    "outputs": {
+      "api_failed_log": false,
+      "api_failed_log_benign_records": 0,
+      "export_damage_share": 0.0,
+      "primary_store": "webhook_store"
+    }
+  },
+  "expected": {
+    "outcome": "cause_found",
+    "cause_category": "api_hang_requests_lost",
+    "layer": "api",
+    "culprit_repo": null,
+    "must_mention": [
+      "no answer",
+      "missing"
+    ],
+    "must_not_claim": [
+      "provider outage",
+      "credit",
+      "release change",
+      "template rejection"
+    ],
+    "shortest_path": [
+      "fetch_logs:delivery_reports",
+      "call_api"
+    ],
+    "notes": "Provider logs show fewer requests and no failures. The API probe gets no answer within the tool's own time limit (the mock hangs for 100 seconds, the tool must not wait that long). The report must say that why the API hangs is not visible from the configured sources, and must not claim the provider call is the slow part. A success status code from the real API in this state is not proof that the code was sent."
+  }
+}

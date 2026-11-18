@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Incident Investigator: replay of recorded runs</title>
+<link rel="stylesheet" href="style.css?v=daa96939">
+<link rel="stylesheet" href="guide.css?v=3c4f946c">
+<link rel="stylesheet" href="tour.css?v=1620b76f">
+<link rel="stylesheet" href="builder.css?v=af6f3898">
+</head>
+<body>
+<div class="notice" role="note">Replay of recorded runs on simulated systems. Some runs come from the scripted stand-in, which is rule-based, not an AI; one run is the output of a real language model on the same invented data. Every person, number and result is synthetic. Not affiliated with any company or product.</div>
+<header>
+  <div class="appbar">
+    <h1>Incident Investigator</h1>
+    <!-- the guide kit puts "Take the tour" and the Builder mode switch here -->
+    <div id="guide-controls" class="guide-controls"></div>
+  </div>
+  <div class="tabrow">
+    <nav class="topnav" aria-label="Main">
+      <button type="button" data-tab="home" class="active" aria-current="page">Home</button>
+      <button type="button" data-tab="replay" aria-current="false">Replay</button>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <div id="builder-note" class="panel builder-note" role="note">
+    <h2>Builder mode: what is real and what is replay only</h2>
+    <p><b>Real:</b> the command-line tool and its mock system run for real on your machine (<code>python3 investigate.py --demo</code>). <span id="builder-recordings">The recordings on this page are real output of that tool, captured by <code>scripts/record_demo.py</code>.</span></p>
+    <p><b>Replay only:</b> this page. It cannot run the tool, take a new question or call anything. It plays back what was recorded.</p>
+    <p id="builder-controls-note">Next shows the next step. Play runs the steps one after another. Reset goes back to the start. Builder mode does not change them; it only adds the numbered markers. Tap a marker to read its card, then press the button on the card (Scroll to it, or Show me where this is) to move the replay to the step where that feature appears. It loads only what is missing and never takes away steps already shown.</p>
+  </div>
+
+  <section id="view-home" aria-label="Home">
+    <div class="panel">
+      <h2>Choose a recorded run</h2>
+      <p class="hint">Each run is labelled: either the command-line tool's scripted stand-in (rule-based, not an AI) on the mock system, or the saved output of a real language model on the same invented data. Pick one to replay it step by step.</p>
+    </div>
+    <div id="slot-replay" class="slotrow" aria-hidden="true"></div>
+    <div id="picker" class="picker"></div>
+  </section>
+
+  <section id="view-replay" aria-label="Replay" hidden>
+    <div id="replay"></div>
+  </section>
+
+  <aside id="privacy" class="panel privacy" aria-label="Privacy"></aside>
+</main>
+
+<footer>
+  <p id="footer-line" class="hint"></p>
+  <p class="hint">Built by Anshul Thangiah as a portfolio concept. MIT licence. Works offline: nothing on this page makes a network call.</p>
+</footer>
+
+<!-- order matters: content, recordings, the app, the shared core, the tour, Builder mode -->
+<script src="guide-text.js?v=bab78c5d"></script>
+<script src="guide-content.js?v=7764138a"></script>
+<script src="recordings.js?v=4390eb84"></script>
+<script src="report-view.js?v=5ddd367e"></script>
+<script src="app.js?v=be077c7a"></script>
+<script src="guide-common.js?v=164784ea"></script>
+<script src="tour.js?v=55c6085d"></script>
+<script src="builder.js?v=580d58ec"></script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+{
+  "id": "S22",
+  "title": "Scheduled database jobs stopped; no tool here can see it",
+  "question": "A small share of verification codes never arrive, with no pattern we can find, since last night. The delivery logs show no failures. What do you see?",
+  "generate": {
+    "faults": [
+      {
+        "type": "scheduled_job_stopped",
+        "start": "2026-11-15T22:00",
+        "share": 0.12
+      }
+    ],
+    "api": {
+      "latency_ms": 80,
+      "forward": "keep",
+      "echo_forwarded_number": false
+    },
+    "repos": {
+      "code_service": "clean",
+      "message_gateway": "clean"
+    },
+    "outputs": {
+      "api_failed_log": false,
+      "api_failed_log_benign_records": 0,
+      "export_damage_share": 0.0,
+      "primary_store": "webhook_store"
+    }
+  },
+  "expected": {
+    "outcome": "inconclusive",
+    "cause_category": "scheduled_jobs_not_visible",
+    "layer": "database_jobs",
+    "culprit_repo": null,
+    "must_mention": [
+      "scheduled",
+      "database"
+    ],
+    "must_not_claim": [
+      "provider outage",
+      "credit",
+      "release change",
+      "template rejection"
+    ],
+    "shortest_path": [
+      "fetch_delivery_logs",
+      "check_message_queue"
+    ],
+    "notes": "A small share of requests never reach the provider, and the queue holds rows waiting far longer than normal in the SENDING status, which a scheduled clean-up job would normally reset. No tool here can read the database server's job history or service status. The report must stay inconclusive, name the long-waiting rows as a hint only, and ask whoever runs the database whether the scheduled jobs are running and when each last ran."
+  }
+}

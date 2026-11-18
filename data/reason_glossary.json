@@ -1,0 +1,37 @@
+{
+  "_about": "Failure-reason glossary for the mock messaging provider. All wording is invented for this project. To use a real provider, replace the 'reasons' list with that provider's own documented reasons (keep the same keys). A reason that is not listed is reported as 'not documented' and is never guessed.",
+  "categories": {
+    "recipient_number": {"label": "Recipient number", "who_fixes": "Usually nothing to fix on the sending side; the number is invalid, inactive or restricted. If many numbers are malformed, check how our system builds the number."},
+    "recipient_device": {"label": "Recipient device", "who_fixes": "Usually nothing to fix on the sending side; the phone is off, full or out of coverage."},
+    "network": {"label": "Network", "who_fixes": "Usually nothing to fix on the sending side; a temporary operator or network problem. Persistent cases go to the provider."},
+    "sending_pattern": {"label": "Our sending pattern or content", "who_fixes": "Ours to check; how often or how we send, or what the message says."},
+    "opt_out": {"label": "Opt-out preference", "who_fixes": "The recipient's own preference; if it hits verification codes, check the message category registered with the provider."},
+    "registration": {"label": "Registration", "who_fixes": "Ours to fix; a template or sender registration problem with the provider."},
+    "unknown": {"label": "Not documented", "who_fixes": "Not in the glossary; ask the provider what it means and add it to data/reason_glossary.json."}
+  },
+  "reasons": [
+    {"match": ["recipient unreachable"], "label": "Recipient unreachable", "category": "recipient_device",
+     "meaning": "The provider could not reach the recipient's phone (switched off, no coverage or full inbox)."},
+    {"match": ["recipient opted out"], "label": "Recipient opted out", "category": "opt_out",
+     "meaning": "The recipient has chosen not to receive messages of this kind."},
+    {"match": ["message expired before delivery"], "label": "Message expired", "category": "network",
+     "meaning": "The message waited too long for delivery and the provider dropped it."},
+    {"match": ["invalid recipient format"], "label": "Invalid recipient format", "category": "recipient_number",
+     "meaning": "The number sent to the provider is not a valid full number (for example a missing country prefix)."},
+    {"match": ["template not registered"], "label": "Template not registered", "category": "registration",
+     "meaning": "The message text does not match any registered template."},
+    {"match": ["sender not registered", "sender not allowed"], "label": "Sender not registered", "category": "registration",
+     "meaning": "The sender name is not registered for this account."},
+    {"match": ["network failure"], "label": "Network failure", "category": "network",
+     "meaning": "The operator network did not accept or confirm the message in time."},
+    {"match": ["too many messages", "rate limited"], "label": "Rate limited", "category": "sending_pattern",
+     "meaning": "Too many messages were sent to the same recipient in a short time."}
+  ],
+  "error_codes": {
+    "E101": {"label": "Insufficient credit", "meaning": "The account had no credit, so the request was refused before it was submitted to the provider.", "category": "registration"},
+    "E102": {"label": "Sender not allowed", "meaning": "The sender name used is not allowed for this account.", "category": "registration"},
+    "E103": {"label": "Template missing", "meaning": "The template named in the request does not exist.", "category": "registration"},
+    "E110": {"label": "Duplicate within 20 seconds", "meaning": "The same request was received twice within 20 seconds and the second was dropped. Normal on its own.", "category": "sending_pattern"},
+    "E105": {"label": "Invalid recipient format", "meaning": "The number in the request was not a valid full number, so it was refused before submission.", "category": "recipient_number"}
+  }
+}

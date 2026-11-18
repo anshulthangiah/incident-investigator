@@ -1,0 +1,47 @@
+{
+  "id": "S12",
+  "title": "Credit exhausted; only the failed-call log shows it",
+  "question": "Verification codes are not coming at all since early morning. Is something broken?",
+  "generate": {
+    "faults": [
+      {
+        "type": "credit_exhausted",
+        "start": "2026-11-16T03:00"
+      }
+    ],
+    "api": {
+      "latency_ms": 80,
+      "forward": "keep",
+      "echo_forwarded_number": false
+    },
+    "repos": {
+      "code_service": "clean",
+      "message_gateway": "clean"
+    },
+    "outputs": {
+      "api_failed_log": true,
+      "api_failed_log_benign_records": 0,
+      "export_damage_share": 0.0,
+      "primary_store": "webhook_store"
+    }
+  },
+  "expected": {
+    "outcome": "cause_found",
+    "cause_category": "credit_exhausted",
+    "layer": "provider_account",
+    "culprit_repo": null,
+    "must_mention": [
+      "E101",
+      "Insufficient credit"
+    ],
+    "must_not_claim": [
+      "release",
+      "provider outage"
+    ],
+    "shortest_path": [
+      "fetch_logs:delivery_reports",
+      "fetch_logs:api_failed_log"
+    ],
+    "notes": "Delivery reports stop after 03:00 with no failures. The failed-call log holds code E101 records from 03:00. The report quotes the code and count, and notes paused requests can be replayed for a limited time after a top-up and that replayed verification codes may already have expired. The code E101 is invented."
+  }
+}

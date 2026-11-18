@@ -1,0 +1,53 @@
+{
+  "id": "S20",
+  "title": "The verification API answers a server error, so nothing reaches the provider",
+  "question": "Users say they tap Send verification code, see an error or a spinner, and nothing arrives. The delivery logs show no failures. What is happening?",
+  "generate": {
+    "faults": [
+      {
+        "type": "api_save_error",
+        "start": "2026-11-16T05:00",
+        "share": 0.7
+      }
+    ],
+    "api": {
+      "latency_ms": 150,
+      "forward": "keep",
+      "echo_forwarded_number": false,
+      "error_status": 500,
+      "error_message": "The server could not store the request (mock wording)"
+    },
+    "repos": {
+      "code_service": "clean",
+      "message_gateway": "clean"
+    },
+    "outputs": {
+      "api_failed_log": false,
+      "api_failed_log_benign_records": 0,
+      "export_damage_share": 0.0,
+      "primary_store": "webhook_store"
+    }
+  },
+  "expected": {
+    "outcome": "cause_found",
+    "cause_category": "api_save_error_requests_lost",
+    "layer": "api",
+    "culprit_repo": null,
+    "must_mention": [
+      "server error",
+      "missing",
+      "engineering"
+    ],
+    "must_not_claim": [
+      "provider outage",
+      "credit",
+      "release change",
+      "template rejection"
+    ],
+    "shortest_path": [
+      "fetch_delivery_logs",
+      "check_code_api"
+    ],
+    "notes": "Provider logs show fewer requests and no new failures. The approved test call to the verification API returns a server error with a message that the request could not be stored, so those requests never reach the provider. The reason the save fails is only in the API server's own log; the report must say so and ask engineering for the inner exception. The report must not blame the provider."
+  }
+}

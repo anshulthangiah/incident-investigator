@@ -1,0 +1,50 @@
+{
+  "id": "S1a",
+  "title": "Release changes recipient number formatting (dial code dropped); provider accepts and reports failed deliveries",
+  "question": "Some users report they get no verification code even after several retries. Is there an issue?",
+  "generate": {
+    "faults": [
+      {
+        "type": "format_strip",
+        "start": "2026-11-15T18:00",
+        "mode": "delivery_failed"
+      }
+    ],
+    "api": {
+      "latency_ms": 80,
+      "forward": "keep",
+      "echo_forwarded_number": false
+    },
+    "repos": {
+      "code_service": "bad_commit",
+      "message_gateway": "clean"
+    },
+    "outputs": {
+      "api_failed_log": false,
+      "api_failed_log_benign_records": 0,
+      "export_damage_share": 0.0,
+      "primary_store": "webhook_store"
+    }
+  },
+  "expected": {
+    "outcome": "cause_found",
+    "cause_category": "release_change_recipient_format",
+    "layer": "api_release",
+    "culprit_repo": "code_service",
+    "must_mention": [
+      "recipient format",
+      "code_service",
+      "release"
+    ],
+    "must_not_claim": [
+      "provider outage",
+      "credit"
+    ],
+    "shortest_path": [
+      "fetch_logs:delivery_reports",
+      "call_api",
+      "get_release_changes"
+    ],
+    "notes": "The real-like probe returns success and does not show the forwarded number, so the report must say the probe could not show or clear the API (R55). Evidence is the recipient number shape in the delivery reports plus the release diff. The failure reason wording in the mock is a placeholder."
+  }
+}

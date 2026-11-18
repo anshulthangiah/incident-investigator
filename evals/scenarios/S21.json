@@ -1,0 +1,51 @@
+{
+  "id": "S21",
+  "title": "Login says the code is invalid because repeated requests replaced earlier codes",
+  "question": "Users say the login screen tells them the code is invalid even though they typed the code they received. Are the messages failing?",
+  "generate": {
+    "faults": [
+      {
+        "type": "repeat_requests",
+        "start": "2026-11-16T00:00",
+        "share": 0.35,
+        "min_gap_s": 15,
+        "max_gap_s": 150
+      }
+    ],
+    "api": {
+      "latency_ms": 80,
+      "forward": "keep",
+      "echo_forwarded_number": false
+    },
+    "repos": {
+      "code_service": "clean",
+      "message_gateway": "clean"
+    },
+    "outputs": {
+      "api_failed_log": false,
+      "api_failed_log_benign_records": 0,
+      "export_damage_share": 0.0,
+      "primary_store": "webhook_store"
+    }
+  },
+  "expected": {
+    "outcome": "cause_found",
+    "cause_category": "repeat_requests_replace_codes",
+    "layer": "app_behaviour",
+    "culprit_repo": null,
+    "must_mention": [
+      "repeat",
+      "replaced"
+    ],
+    "must_not_claim": [
+      "delivery failures",
+      "credit",
+      "provider outage",
+      "release change"
+    ],
+    "shortest_path": [
+      "fetch_delivery_logs"
+    ],
+    "notes": "Every message is delivered and the failure rate is normal, but from the start a large share of recipients request a second code within a few minutes of the first. A newer code replaces the older one, so a user who types the earlier code is told it is invalid. The logs show the repeat requests only; they cannot show which code a user typed or how the server picks the code to validate, and the report must say so. A probable cause stated with its limits is acceptable; certainty is not."
+  }
+}
